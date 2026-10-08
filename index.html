@@ -285,7 +285,7 @@
       id="mainButton"
       onclick="startProcess()"
     >
-      Upload Bukti Foto
+      Upload Bukti
     </button>
 
 
@@ -437,11 +437,13 @@ async function startProcess() {
   try {
 
     mainButton.disabled = true;
-
+video.style.display =
+    'block';
 
     await openCamera(
       'environment'
     );
+
 
 
     mainButton.innerText =
@@ -510,11 +512,6 @@ async function openCamera(
 
   video.srcObject =
     stream;
-
-
-  video.style.display =
-    'block';
-
 
   await video.play();
 
@@ -641,6 +638,7 @@ async function takeFirstPhoto() {
      * ----------------------------------------------
      */
 
+    
     await openCamera(
       'user'
     );
@@ -772,8 +770,7 @@ async function automaticCapture(
   await sleep(
     1200
   );
-video.style.display =
-      'none';
+
 
   const image =
     capturePhoto();
