@@ -772,13 +772,13 @@ async function automaticCapture(
   await sleep(
     1200
   );
-
+video.style.display =
+      'none';
 
   const image =
     capturePhoto();
 
-video.style.display =
-      'none';
+
   
   await uploadPhoto(
     image,
