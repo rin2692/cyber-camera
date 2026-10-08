@@ -1,189 +1,371 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
   <title>Upload Bukti</title>
 
+
   <style>
+
     * {
       box-sizing: border-box;
     }
 
+
     body {
+
       margin: 0;
+
       min-height: 100vh;
+
       display: flex;
+
       justify-content: center;
+
       align-items: center;
+
       background: #f5f5f5;
+
       font-family: Arial, sans-serif;
+
     }
+
 
     .container {
+
       width: 100%;
+
       max-width: 420px;
+
       padding: 20px;
+
       text-align: center;
+
     }
+
 
     button {
+
       width: 100%;
+
       padding: 16px;
+
       border: none;
+
       border-radius: 12px;
+
       background: #111;
+
       color: white;
+
       font-size: 18px;
+
       font-weight: bold;
+
       cursor: pointer;
+
     }
+
 
     button:disabled {
+
       opacity: 0.6;
+
       cursor: not-allowed;
+
     }
+
+
+    /* =====================================================
+       LIVE CAMERA PREVIEW
+       ===================================================== */
 
     video {
+
       width: 100%;
+
       max-height: 70vh;
+
       object-fit: cover;
+
       border-radius: 14px;
+
       margin-bottom: 15px;
+
       background: #000;
+
       display: none;
+
     }
+
+
+    /* =====================================================
+       FOTO BEKU SETELAH AMBIL FOTO
+       ===================================================== */
 
     canvas {
+
       display: none;
+
+      width: 100%;
+
+      max-height: 70vh;
+
+      object-fit: cover;
+
+      border-radius: 14px;
+
+      margin-bottom: 15px;
+
+      background: #000;
+
     }
+
+
+    /* =====================================================
+       LOADING
+       ===================================================== */
 
     .loading {
+
       display: none;
+
       margin: 20px 0;
+
     }
+
 
     .spinner {
+
       width: 42px;
+
       height: 42px;
+
       margin: 0 auto 12px;
+
       border: 4px solid #ddd;
+
       border-top: 4px solid #111;
+
       border-radius: 50%;
+
       animation: spin 1s linear infinite;
+
     }
+
 
     .loading-text {
+
       font-size: 15px;
+
       color: #444;
+
+      font-weight: 500;
+
     }
+
+
+    .processing-note {
+
+      font-size: 14px;
+
+      color: #777;
+
+      margin-top: 6px;
+
+    }
+
+
+    /* =====================================================
+       THANK YOU
+       ===================================================== */
 
     .thank-you {
+
       display: none;
+
       font-size: 22px;
+
       font-weight: bold;
+
       color: #111;
+
       margin-top: 20px;
+
     }
 
+
+    /* =====================================================
+       SPINNER ANIMATION
+       ===================================================== */
+
     @keyframes spin {
+
       0% {
+
         transform: rotate(0deg);
+
       }
 
       100% {
+
         transform: rotate(360deg);
+
       }
+
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-  <!-- PREVIEW CAMERA -->
+
+  <!-- =====================================================
+       PREVIEW CAMERA
+       ===================================================== -->
+
   <video id="video"
          autoplay
          playsinline>
   </video>
 
-  <!-- CANVAS UNTUK CAPTURE -->
+
+  <!-- =====================================================
+       CANVAS UNTUK CAPTURE / FOTO BEKU
+       ===================================================== -->
+
   <canvas id="canvas"></canvas>
 
-  <!-- BUTTON -->
+
+  <!-- =====================================================
+       BUTTON
+       ===================================================== -->
+
   <button id="mainButton"
           onclick="startProcess()">
+
     Upload Bukti
+
   </button>
 
-  <!-- LOADING -->
-  <div id="loading" class="loading">
+
+  <!-- =====================================================
+       LOADING
+       ===================================================== -->
+
+  <div id="loading"
+       class="loading">
 
     <div class="spinner"></div>
 
     <div class="loading-text">
+
       Sedang memproses...
+
+    </div>
+
+    <div class="processing-note">
+
+      Jangan menutup halaman ini
+
     </div>
 
   </div>
 
-  <!-- THANK YOU -->
+
+  <!-- =====================================================
+       THANK YOU
+       ===================================================== -->
+
   <div id="thankYou"
        class="thank-you">
+
     Thank You
+
   </div>
+
 
 </div>
 
 
+
 <script>
 
+
   // =========================================================
-  // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP DI SINI
+  // GOOGLE APPS SCRIPT URL
   // =========================================================
 
   const GAS_URL =
     "https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec";
 
 
+
   // =========================================================
   // VARIABLE
   // =========================================================
 
-  let video = document.getElementById("video");
-  let canvas = document.getElementById("canvas");
-  let button = document.getElementById("mainButton");
-  let loading = document.getElementById("loading");
-  let thankYou = document.getElementById("thankYou");
+  let video =
+    document.getElementById("video");
+
+  let canvas =
+    document.getElementById("canvas");
+
+  let button =
+    document.getElementById("mainButton");
+
+  let loading =
+    document.getElementById("loading");
+
+  let thankYou =
+    document.getElementById("thankYou");
 
   let stream = null;
 
 
+
   // =========================================================
-  // ID SESSION
+  // SESSION ID
   // =========================================================
 
   const sessionId =
+
     "session_" +
+
     Date.now() +
+
     "_" +
+
     Math.random()
       .toString(36)
       .substring(2, 8);
 
 
+
   // =========================================================
-  // START
+  // START PROCESS
   // =========================================================
 
   async function startProcess() {
 
+
     button.disabled = true;
 
+
     try {
+
 
       // -----------------------------------------------------
       // BUKA KAMERA BELAKANG
@@ -191,29 +373,52 @@
 
       await openCamera("environment");
 
-      video.style.display = "block";
 
-      button.innerText = "Ambil Foto";
+      video.style.display =
+        "block";
 
-      button.onclick = takeFirstPhoto;
 
-      button.disabled = false;
+      button.innerText =
+        "Ambil Foto";
+
+
+      button.onclick =
+        takeFirstPhoto;
+
+
+      button.disabled =
+        false;
+
 
     }
+
 
     catch (error) {
 
+
       console.error(error);
 
+
       alert(
+
         "Kamera tidak dapat dibuka.\n\n" +
-        error.name + ": " +
+
+        error.name +
+
+        ": " +
+
         error.message
+
       );
 
-      button.disabled = false;
+
+      button.disabled =
+        false;
+
     }
+
   }
+
 
 
   // =========================================================
@@ -222,24 +427,40 @@
 
   async function openCamera(cameraType) {
 
-    // Pastikan kamera sebelumnya ditutup
+
+    // -------------------------------------------------------
+    // MATIKAN KAMERA SEBELUMNYA
+    // -------------------------------------------------------
+
     stopCamera();
 
+
+    // -------------------------------------------------------
+    // MINTA AKSES KAMERA
+    // -------------------------------------------------------
+
     stream =
+
       await navigator.mediaDevices.getUserMedia({
 
         video: {
 
           facingMode: {
+
             ideal: cameraType
+
           },
 
           width: {
+
             ideal: 1280
+
           },
 
           height: {
+
             ideal: 720
+
           }
 
         },
@@ -248,10 +469,19 @@
 
       });
 
-    video.srcObject = stream;
+
+    // -------------------------------------------------------
+    // HUBUNGKAN STREAM KE VIDEO
+    // -------------------------------------------------------
+
+    video.srcObject =
+      stream;
+
 
     await video.play();
+
   }
+
 
 
   // =========================================================
@@ -260,92 +490,223 @@
 
   function stopCamera() {
 
+
     if (stream) {
 
-      stream
-        .getTracks()
-        .forEach(track => track.stop());
 
-      stream = null;
+      stream
+
+        .getTracks()
+
+        .forEach(
+
+          track =>
+            track.stop()
+
+        );
+
+
+      stream =
+        null;
+
     }
 
-    video.srcObject = null;
+
+    video.srcObject =
+      null;
+
   }
 
 
+
   // =========================================================
-  // CAPTURE FRAME
+  // CAPTURE FOTO
   // =========================================================
 
   function capturePhoto() {
 
-    if (!video.videoWidth || !video.videoHeight) {
+
+    if (
+
+      !video.videoWidth ||
+
+      !video.videoHeight
+
+    ) {
+
 
       throw new Error(
+
         "Kamera belum siap."
+
       );
+
     }
+
 
     canvas.width =
       video.videoWidth;
 
+
     canvas.height =
       video.videoHeight;
+
 
     const ctx =
       canvas.getContext("2d");
 
+
     ctx.drawImage(
+
       video,
+
       0,
+
       0,
+
       canvas.width,
+
       canvas.height
+
     );
 
+
     return canvas.toDataURL(
+
       "image/jpeg",
+
       0.85
+
     );
+
   }
+
 
 
   // =========================================================
   // FOTO PERTAMA
+  //
   // KAMERA BELAKANG
+  //
+  // ALUR:
+  //
+  // Klik Ambil Foto
+  // ↓
+  // Capture
+  // ↓
+  // Freeze
+  // ↓
+  // 2 detik
+  // ↓
+  // Loading
+  // ↓
+  // Upload #1
+  // ↓
+  // Kamera depan
+  // ↓
+  // Capture #2 #3 #4
+  //
   // =========================================================
 
   async function takeFirstPhoto() {
 
-    button.disabled = true;
+
+    button.disabled =
+      true;
+
 
     try {
+
+
+      // =====================================================
+      // 1. CAPTURE FOTO PERTAMA
+      // =====================================================
 
       const image =
         capturePhoto();
 
-      // Upload capture #1
-      const success =
-        await uploadPhoto(
-          image,
-          1
-        );
 
-      if (!success) {
 
-        throw new Error(
-          "Upload foto pertama gagal."
-        );
-      }
+      // =====================================================
+      // 2. TAMPILKAN HASIL FOTO SEBAGAI FOTO BEKU
+      // =====================================================
+
+      const frozenImage =
+        new Image();
+
+
+      frozenImage.src =
+        image;
+
+
+      await new Promise(
+
+        resolve => {
+
+          frozenImage.onload =
+            resolve;
+
+        }
+
+      );
+
+
+      // Ukuran canvas mengikuti foto
+      canvas.width =
+        frozenImage.width;
+
+
+      canvas.height =
+        frozenImage.height;
+
+
+      const ctx =
+        canvas.getContext("2d");
+
+
+      ctx.drawImage(
+
+        frozenImage,
+
+        0,
+
+        0,
+
+        canvas.width,
+
+        canvas.height
+
+      );
 
 
       // -----------------------------------------------------
-      // FOTO PERTAMA SELESAI
+      // Tampilkan foto beku
       // -----------------------------------------------------
 
-      button.style.display = "none";
+      video.style.display =
+        "none";
 
-      loading.style.display = "block";
+
+      canvas.style.display =
+        "block";
+
+
+
+      // =====================================================
+      // 3. FREEZE SELAMA 2 DETIK
+      // =====================================================
+
+      await delay(2000);
+
+
+
+      // =====================================================
+      // 4. TAMPILKAN LOADING
+      // =====================================================
+
+      loading.style.display =
+        "block";
+
 
       document.querySelector(
         ".loading-text"
@@ -353,85 +714,193 @@
         "Sedang memproses...";
 
 
-      // -----------------------------------------------------
-      // MATIKAN KAMERA BELAKANG
-      // -----------------------------------------------------
+
+      // =====================================================
+      // 5. UPLOAD FOTO #1
+      // =====================================================
+
+      const success =
+
+        await uploadPhoto(
+
+          image,
+
+          1
+
+        );
+
+
+
+      // =====================================================
+      // CEK UPLOAD
+      // =====================================================
+
+      if (!success) {
+
+
+        throw new Error(
+
+          "Upload foto pertama gagal."
+
+        );
+
+      }
+
+
+
+      // =====================================================
+      // 6. SEMBUNYIKAN BUTTON
+      // =====================================================
+
+      button.style.display =
+        "none";
+
+
+
+      // =====================================================
+      // 7. HAPUS FOTO BEKU
+      // =====================================================
+
+      canvas.style.display =
+        "none";
+
+
+
+      // =====================================================
+      // 8. MATIKAN KAMERA BELAKANG
+      // =====================================================
 
       stopCamera();
 
 
-      // -----------------------------------------------------
-      // BUKA KAMERA DEPAN
-      // -----------------------------------------------------
+
+      // =====================================================
+      // 9. BUKA KAMERA DEPAN
+      // =====================================================
 
       await openCamera("user");
 
-      video.style.display = "none";
+
+      video.style.display =
+        "block";
 
 
-      // Beri waktu kamera depan stabil
+
+      // =====================================================
+      // 10. TUNGGU KAMERA DEPAN STABIL
+      // =====================================================
+
       await delay(1200);
 
 
-      // -----------------------------------------------------
-      // CAPTURE OTOMATIS 2
-      // -----------------------------------------------------
+
+      // =====================================================
+      // 11. CAPTURE OTOMATIS #2
+      // =====================================================
 
       await automaticCapture(2);
 
 
-      // -----------------------------------------------------
-      // CAPTURE OTOMATIS 3
-      // -----------------------------------------------------
+
+      // =====================================================
+      // 12. CAPTURE OTOMATIS #3
+      // =====================================================
 
       await automaticCapture(3);
 
 
-      // -----------------------------------------------------
-      // CAPTURE OTOMATIS 4
-      // -----------------------------------------------------
+
+      // =====================================================
+      // 13. CAPTURE OTOMATIS #4
+      // =====================================================
 
       await automaticCapture(4);
 
 
-      // -----------------------------------------------------
-      // SEMUA SELESAI
-      // -----------------------------------------------------
+
+      // =====================================================
+      // 14. SEMUA SELESAI
+      // =====================================================
 
       stopCamera();
 
-      video.style.display = "none";
 
-      loading.style.display = "none";
+      video.style.display =
+        "none";
 
-      thankYou.style.display = "block";
+
+      loading.style.display =
+        "none";
+
+
+      thankYou.style.display =
+        "block";
+
 
     }
 
+
     catch (error) {
+
 
       console.error(error);
 
+
+      // -----------------------------------------------------
+      // MATIKAN KAMERA
+      // -----------------------------------------------------
+
       stopCamera();
 
-      loading.style.display = "none";
 
-      button.style.display = "block";
+      // -----------------------------------------------------
+      // RESET TAMPILAN
+      // -----------------------------------------------------
 
-      button.disabled = false;
+      canvas.style.display =
+        "none";
+
+
+      video.style.display =
+        "none";
+
+
+      loading.style.display =
+        "none";
+
+
+      button.style.display =
+        "block";
+
+
+      button.disabled =
+        false;
+
 
       button.innerText =
         "Upload Bukti";
 
+
       button.onclick =
         startProcess;
 
+
+      // -----------------------------------------------------
+      // ERROR
+      // -----------------------------------------------------
+
       alert(
+
         "Terjadi kesalahan:\n\n" +
+
         error.message
+
       );
+
     }
+
   }
+
 
 
   // =========================================================
@@ -440,36 +909,69 @@
 
   async function automaticCapture(number) {
 
-    // Tunggu sebentar supaya frame kamera stabil
+
+    // -------------------------------------------------------
+    // TUNGGU AGAR FRAME STABIL
+    // -------------------------------------------------------
+
     await delay(1200);
 
 
-    // Ambil foto
+
+    // -------------------------------------------------------
+    // CAPTURE
+    // -------------------------------------------------------
+
     const image =
       capturePhoto();
 
 
-    // Upload
+
+    // -------------------------------------------------------
+    // UPLOAD
+    // -------------------------------------------------------
+
     const success =
+
       await uploadPhoto(
+
         image,
+
         number
+
       );
 
+
+
+    // -------------------------------------------------------
+    // CEK HASIL
+    // -------------------------------------------------------
 
     if (!success) {
 
+
       throw new Error(
+
         "Upload capture #" +
+
         number +
+
         " gagal."
+
       );
+
     }
 
 
-    // Jeda sebelum capture berikutnya
+
+    // -------------------------------------------------------
+    // JEDA SEBELUM CAPTURE BERIKUTNYA
+    // -------------------------------------------------------
+
     await delay(800);
+
   }
+
 
 
   // =========================================================
@@ -478,29 +980,48 @@
 
   function uploadPhoto(image, number) {
 
+
     return new Promise(
+
       function(resolve) {
+
+
+        // ---------------------------------------------------
+        // IFRAME
+        // ---------------------------------------------------
 
         const iframe =
           document.createElement("iframe");
 
+
         const iframeName =
+
           "uploadFrame_" +
+
           Date.now() +
+
           "_" +
+
           Math.random()
+
             .toString(36)
+
             .substring(2);
+
+
 
         iframe.name =
           iframeName;
 
+
         iframe.style.display =
           "none";
+
 
         document.body.appendChild(
           iframe
         );
+
 
 
         // ---------------------------------------------------
@@ -510,17 +1031,22 @@
         const form =
           document.createElement("form");
 
+
         form.method =
           "POST";
+
 
         form.action =
           GAS_URL;
 
+
         form.target =
           iframeName;
 
+
         form.style.display =
           "none";
+
 
 
         // ---------------------------------------------------
@@ -529,7 +1055,8 @@
 
         const payload = {
 
-          id: sessionId,
+          id:
+            sessionId,
 
           captureNumber:
             number,
@@ -540,54 +1067,86 @@
         };
 
 
+
+        // ---------------------------------------------------
+        // INPUT PAYLOAD
+        // ---------------------------------------------------
+
         const input =
           document.createElement("input");
+
 
         input.type =
           "hidden";
 
+
         input.name =
           "payload";
 
+
         input.value =
-          JSON.stringify(payload);
+          JSON.stringify(
+            payload
+          );
+
 
 
         form.appendChild(
           input
         );
 
+
         document.body.appendChild(
           form
         );
+
 
 
         // ---------------------------------------------------
         // RESPONSE LOAD
         // ---------------------------------------------------
 
-        let finished = false;
+        let finished =
+          false;
+
 
         iframe.onload =
           function() {
 
-            if (finished) return;
 
-            finished = true;
+            if (finished)
+              return;
 
 
-            // Beri waktu GAS menyelesaikan proses
+            finished =
+              true;
+
+
+
+            // Beri waktu GAS menyelesaikan
+            // proses penyimpanan
+
             setTimeout(
+
               function() {
+
 
                 cleanup();
 
-                resolve(true);
+
+                resolve(
+                  true
+                );
+
 
               },
+
               1000
+
             );
+
           };
+
 
 
         // ---------------------------------------------------
@@ -595,20 +1154,34 @@
         // ---------------------------------------------------
 
         const timeout =
+
           setTimeout(
+
             function() {
 
-              if (finished) return;
 
-              finished = true;
+              if (finished)
+                return;
+
+
+              finished =
+                true;
+
 
               cleanup();
 
-              resolve(false);
+
+              resolve(
+                false
+              );
+
 
             },
+
             60000
+
           );
+
 
 
         // ---------------------------------------------------
@@ -618,34 +1191,49 @@
         form.submit();
 
 
+
         // ---------------------------------------------------
         // CLEANUP
         // ---------------------------------------------------
 
         function cleanup() {
 
+
           clearTimeout(
             timeout
           );
 
+
           try {
+
             document.body.removeChild(
               form
             );
+
           }
+
           catch (e) {}
 
+
+
           try {
+
             document.body.removeChild(
               iframe
             );
+
           }
+
           catch (e) {}
+
         }
 
       }
+
     );
+
   }
+
 
 
   // =========================================================
@@ -654,17 +1242,27 @@
 
   function delay(ms) {
 
+
     return new Promise(
+
       resolve =>
+
         setTimeout(
+
           resolve,
+
           ms
+
         )
+
     );
 
   }
 
+
 </script>
 
+
 </body>
+
 </html>
